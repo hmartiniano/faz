@@ -1,3 +1,4 @@
+# Using bash as the interpreter
 # file3, file4 <- file1, file2
 echo "Hellow world! 1" > file3
 echo "Hellow world! 1" > file4
@@ -7,6 +8,15 @@ echo "Hellow world! 2" > file6
 # file7, file8 <- file5, file6
 echo "Hellow world! 3" > file7
 echo "Hellow world! 3" > file8
-# file9, file10 <- file5, file3 [python]
+# Now using python as the interpreter
+# file9, file10, file11 <- file5, file3 [python]
+import numpy as np
+
+a = np.arange(9).reshape((3,3))
+np.savetxt("file11", a)
 open("file9", "w").write("Hello from python\n")
 open("file10", "w").write("Hello from python\n")
+
+# file22, file33, <- file1* [ruby]
+File.open("file22", 'w') { |file| file.write("Hi Ruby22!") }
+File.open("file33", 'w') { |file| file.write("Hi Ruby33!") }

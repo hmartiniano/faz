@@ -9,45 +9,60 @@ class FubarException(Exception):
     pass
 
 
+class Task(object):
+    
+    def __init__(self, interpreter, inputs, outputs, code, comments=None):
+        self.interpreter = interpreter
+        self.inputs = inputs
+        self.outputs = outputs
+        self.code = code
+        self.comments = comments
+
+
 def parser(text):
-    """ Very crude parser for afile with syntax similar to Drake."""
+    """ Very crude parser for a file with syntax somewhat similar to Drake."""
     tasks = []
     code = []
+    comments = []
     task_found = False
     for line in text.splitlines():
         if line.startswith("#"):
-            interpreter = "bash"
-            if task_found:
-                tasks.append((interpreter, inputs, outputs, code))
-            inputs = []
-            outputs = []
-            code = []
-            lexer = shlex.shlex(line[1:])
-            tokens = [token for token in lexer]
-            print tokens
-            found = False
-            found_interpreter = False
-            for token in tokens:
-                if "]" in token:
-                    break
-                elif found_interpreter:
-                    interpreter = token
-                    found_interpreter = False
-                elif "[" in token:
-                    found_interpreter = True
-                elif "<" in token or "-" in token:
-                    found = True
-                elif "," in token:
-                    continue
-                elif found:
-                    inputs.append(token)
-                else:
-                    outputs.append(token)
-            task_found = True
+            if "<-" in line:
+                interpreter = "bash"
+                if task_found:
+                    tasks.append((interpreter, inputs, outputs, code, comments))
+                inputs = []
+                outputs = []
+                code = []
+                lexer = shlex.shlex(line[1:])
+                tokens = [token for token in lexer]
+                print tokens
+                found = False
+                found_interpreter = False
+                for token in tokens:
+                    if "]" in token:
+                        break
+                    elif found_interpreter:
+                        interpreter = token
+                        found_interpreter = False
+                    elif "[" in token:
+                        found_interpreter = True
+                    elif "<" in token or "-" in token:
+                        found = True
+                    elif "," in token:
+                        continue
+                    elif found:
+                        inputs.append(token)
+                    else:
+                        outputs.append(token)
+                task_found = True
+                comments = []
+            else:
+                comments.append(line)
         else:
             code.append(line)
     if task_found:
-        tasks.append((interpreter, inputs, outputs, code))
+        tasks.append((interpreter, inputs, outputs, code, comments))
     return tasks
 
 

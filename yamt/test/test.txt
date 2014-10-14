@@ -1,4 +1,6 @@
 # Using bash as the interpreter
+# file1, file2 <-
+touch file1 file2
 # file3, file4 <- file1, file2
 echo "Hellow world! 1" > file3
 echo "Hellow world! 1" > file4
@@ -17,6 +19,6 @@ np.savetxt("file11", a)
 open("file9", "w").write("Hello from python\n")
 open("file10", "w").write("Hello from python\n")
 
-# file22, file33, <- file1* [ruby]
+# file22, file33 <- file1, file11 [ruby]
 File.open("file22", 'w') { |file| file.write("Hi Ruby22!") }
 File.open("file33", 'w') { |file| file.write("Hi Ruby33!") }

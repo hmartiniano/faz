@@ -1,0 +1,2 @@
+puts "Hi from ruby" >> file22
+puts "Hi from ruby" >> file33

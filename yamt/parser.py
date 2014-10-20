@@ -3,7 +3,7 @@ import shlex
 from .core import Task
 
 
-def parser(text):
+def old_parser(text):
     """ Very crude parser for a file with syntax somewhat similar to Drake."""
     tasks = []
     code = []

@@ -12,14 +12,47 @@ import unittest
 
 from yamt import yamt
 
+FILE1 = """
+# Using bash as the interpreter
+# file1, file2 <-
+touch file1 file2
+
+# file3, file4 <- file1, file2
+echo "Hellow world! 1" > file3
+echo "Hellow world! 1" > file4
+
+# file5, file6 <- file3, file4
+echo "Hellow world! 2" > file5
+echo "Hellow world! 2" > file6
+
+# file7, file8 <- file5, file6
+echo "Hellow world! 3" > file7
+echo "Hellow world! 3" > file8
+
+# Now using python as the interpreter
+# file9, file10, file11 <- file5, file3 [python]
+import numpy as np
+
+a = np.arange(9).reshape((3,3))
+np.savetxt("file11", a)
+open("file9", "w").write("Hello from python\n")
+open("file10", "w").write("Hello from python\n")
+
+# file22, file33 <- file1, file11 [ruby]
+File.open("file22", 'w') { |file| file.write("Hi Ruby22!") }
+File.open("file33", 'w') { |file| file.write("Hi Ruby33!") }
+"""
+
 
 class TestYamt(unittest.TestCase):
 
     def setUp(self):
-        pass
+        f = open("yamtfile")
+        f.write(FILE1)
+        f.close()
 
     def test_something(self):
-        pass
+        yamt.main()
 
     def tearDown(self):
         pass

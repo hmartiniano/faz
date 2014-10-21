@@ -54,14 +54,14 @@ def old_parser(text):
     return tasks
 
 
-def parse_input_file(text):
+def parse_input_file(text, **kwargs):
     """ Very crude parser for a file with syntax somewhat similar to Drake."""
     tasks = []
     code = []
     comments = []
     task_found = False
     for line in text.splitlines():
-        #line = line.rstrip()
+        # line = line.rstrip()
         if line.startswith("#"):
             if task_found:
                 tasks.append(

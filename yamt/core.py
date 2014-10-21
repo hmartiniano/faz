@@ -21,13 +21,14 @@ class Task(object):
         self.outputs = expand_filenames(outputs)
         self.code = code
         self.comments = comments
+        self.order = 0
 
     def execute(self):
         """ Invoque an interpreter to execute the code of a given task. """
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
         out = subprocess.check_output([self.interpreter, self.fname])
-        logging.info("{0}".format(out))
+        logging.info("Output from Task {0}\n{1}".format(self.order, out))
         os.close(self.fd)
         os.unlink(self.fname)
         if not(files_exist(self.outputs)):

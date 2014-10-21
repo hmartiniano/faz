@@ -95,6 +95,16 @@ touch file5
 """
 
 
+FILE6 = """
+# Using bash as the interpreter
+# file21, file22 <-
+touch file21 file22
+
+# file3, file4 <- file2*
+touch file3, file4
+"""
+
+
 class TestYamt(unittest.TestCase):
 
     def setUp(self):
@@ -137,6 +147,8 @@ class TestMissingInputs(unittest.TestCase):
 class TestYAMTFileInDir(unittest.TestCase):
 
     def setUp(self):
+        for fname in glob.glob(".yamt/tmp*"):
+            os.remove(fname)
         os.rmdir(".yamt")
         f = open(".yamt", "w")
         f.close()
@@ -186,5 +198,17 @@ class TestOutputsAreOlderThanInputs(unittest.TestCase):
         pass
 
 
+class TestWildcardInName(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        main.yamt(FILE6)
+
+    def tearDown(self):
+        pass
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

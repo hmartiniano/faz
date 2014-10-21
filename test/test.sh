@@ -1,4 +1,5 @@
 #!/bin/bash
+export PYTHONPATH=/home/hugo/devel/MakeTools/yamt:$PYTHONPATH
 rm file*
 #touch file1 file2
-python ../core.py test.txt
+python ../yamt/main.py -v

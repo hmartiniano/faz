@@ -12,7 +12,12 @@ readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 requirements = [
-    # TODO: put package requirements here
+    "networkx==1.9.1",
+    "PyYAML==3.11",
+    "argparse==1.2.1",
+    "decorator==3.4.0",
+    "networkx==1.9.1",
+    "wheel==0.23.0",
 ]
 
 test_requirements = [

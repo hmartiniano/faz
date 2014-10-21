@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import shlex
-from .core import Task
+
+
+from yamt.core import Task
 
 
 def old_parser(text):
@@ -52,14 +54,14 @@ def old_parser(text):
     return tasks
 
 
-def parser(text):
+def parse_input_file(text):
     """ Very crude parser for a file with syntax somewhat similar to Drake."""
     tasks = []
     code = []
     comments = []
     task_found = False
     for line in text.splitlines():
-        line = line.strip()
+        #line = line.rstrip()
         if line.startswith("#"):
             if task_found:
                 tasks.append(
@@ -74,12 +76,10 @@ def parser(text):
                     interpreter = "bash"
                 line = line.replace("[" + interpreter + "]", "")
                 outputs, inputs = line[1:].split("<-")
-                print inputs, outputs
                 inputs = [item.strip() for item in inputs.split(",")]
                 outputs = [item.strip() for item in outputs.split(",")]
                 inputs = [item for item in inputs if not(item == "")]
                 outputs = [item for item in outputs if not(item == "")]
-                print inputs, outputs
                 task_found = True
                 code = []
             else:

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
+import logging
 import tempfile
 import subprocess
 import networkx as nx
-from .utils import expand_filenames, files_exist, dependencies_are_newer
+from yamt.utils import expand_filenames, files_exist, dependencies_are_newer
 
 
 class FubarException(Exception):
@@ -26,7 +27,7 @@ class Task(object):
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
         out = subprocess.check_output([self.interpreter, self.fname])
-        print out
+        logging.info("{0}".format(out))
         os.close(self.fd)
         os.unlink(self.fname)
         if not(files_exist(self.outputs)):
@@ -44,31 +45,31 @@ class Task(object):
         self.fd, self.fname = tempfile.mkstemp(dir=self.dirname, text=True)
 
     def __repr__(self):
-        return "Interpreter: %s; Inputs: %s; Outputs: %s;" % (
-            self.interpreter, ", ".join(self.inputs), ", ".join(self.outputs))
+        return "%s <- %s [%s]" % (
+            ", ".join(self.inputs), ", ".join(self.outputs), self.interpreter)
 
 
 def execute(graph, tasks):
     """ Given a dependency graph check inputs
-        and outputs and execute tasks.
+        and outputs and execute tasks if needed.
     """
     for node in nx.topological_sort(graph):
         task = tasks[node]
-        print node, task
-        print task.inputs
-        print task.outputs
+        logging.info("Task {0}: {1}".format(task.order, task))
         if files_exist(task.inputs) or len(task.inputs) == 0:
             if files_exist(task.outputs):
                 if dependencies_are_newer(task.outputs, task.inputs):
-                    print "Dependencies are newer than outputs. Running task."
+                    logging.info(
+                        "Dependencies are newer than outputs. Running task.")
                     task.execute()
                 else:
-                    print "Ouputs exist and are older than inputs."
+                    logging.info(
+                        "Ouput file(s) exist and are older than inputs.")
             else:
-                print "No ouputs. Running task."
+                logging.info("No ouput file(s). Running task.")
                 task.execute()
         else:
-            print "Not executing task. Input files do not exist."
+            logging.info("Not executing task. Input file(s) do not exist.")
 
 
 def dependency_graph(tasks):
@@ -87,7 +88,17 @@ def dependency_graph(tasks):
     return graph
 
 
-def show_graph(graph, tasks):
-    for node in nx.topological_sort(graph):
-        print node, tasks[node]
-        print "Predecessors:", graph.predecessors(node)
+def show_tasks(graph, tasks):
+    for n, node in enumerate(nx.topological_sort(graph)):
+        task = tasks[node]
+        task.predecessors = graph.predecessors(node)
+        task.order = n
+        logging.info("Task {0}  ******************************".format(n))
+        logging.info("Predecessors: {0}".format(task.predecessors))
+        logging.info("Comments: {0}".format(task.comments))
+        logging.info("Interpreter: {0}".format(task.interpreter))
+        logging.info("Inputs: {0}".format(task.inputs))
+        logging.info("Outputs: {0}".format(task.outputs))
+        logging.info("Code:")
+        for line in task.code:
+            logging.info("{0}".format(line))

@@ -7,6 +7,8 @@ test_yamt
 
 Tests for `yamt` module.
 """
+import os
+import glob
 
 import unittest
 
@@ -47,18 +49,142 @@ File.open("file33", 'w') { |file| file.write("Hi Ruby33!") }
 """
 
 
+FILE2 = """
+# Using bash as the interpreter
+# file1, file2 <-
+touch file3 file4
+touch file1 file2
+
+# file3, file4 <- file1, file2
+echo "Hellow world! 1" > file3
+echo "Hellow world! 1" > file4
+
+# file5, file6 <- file3, file4
+echo "Hellow world! 2" > file5
+echo "Hellow world! 2" > file6
+
+# file7, file8 <- file5, file6
+echo "Hellow world! 3" > file7
+echo "Hellow world! 3" > file8
+"""
+
+FILE3 = """
+# Using bash as the interpreter
+# file1, file2 <-
+touch file3 file4
+"""
+
+FILE4 = """
+# Using bash as the interpreter
+# file3, file4 <- file1, file2
+touch file3 file4
+"""
+
+
+FILE5 = """
+# Using bash as the interpreter
+# file1, file2 <-
+touch file5
+touch file1 file2
+
+# file3, file4 <- file1, file2
+touch file3, file4
+
+# file5 <- file3, file4
+touch file5
+"""
+
+
 class TestYamt(unittest.TestCase):
 
     def setUp(self):
-        f = open("yamtfile", "w")
-        f.write(FILE1)
-        f.close()
+        pass
 
     def test_something(self):
         main.yamt(FILE1)
 
     def tearDown(self):
+        for fname in glob.glob("file*"):
+            os.unlink(fname)
+
+
+class TestMissingInput(unittest.TestCase):
+
+    def setUp(self):
         pass
+
+    @unittest.expectedFailure
+    def test_something(self):
+        main.yamt()
+
+    def tearDown(self):
+        pass
+
+
+class TestMissingInputs(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        main.yamt(FILE2)
+
+    def tearDown(self):
+        for fname in glob.glob("file*"):
+            os.unlink(fname)
+
+
+class TestYAMTFileInDir(unittest.TestCase):
+
+    def setUp(self):
+        os.rmdir(".yamt")
+        f = open(".yamt", "w")
+        f.close()
+
+    @unittest.expectedFailure
+    def test_something(self):
+        main.yamt(FILE1)
+
+    def tearDown(self):
+        os.unlink(".yamt")
+
+
+class TestOuputsNotCreated(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    @unittest.expectedFailure
+    def test_something(self):
+        main.yamt(FILE3)
+
+    def tearDown(self):
+        pass
+
+
+class TestInputsDoNotExist(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        main.yamt(FILE4)
+
+    def tearDown(self):
+        pass
+
+
+class TestOutputsAreOlderThanInputs(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        main.yamt(FILE5)
+
+    def tearDown(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

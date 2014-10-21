@@ -46,7 +46,7 @@ class Task(object):
 
     def __repr__(self):
         return "%s <- %s [%s]" % (
-            ", ".join(self.inputs), ", ".join(self.outputs), self.interpreter)
+            ", ".join(self.outputs), ", ".join(self.inputs), self.interpreter)
 
 
 def execute(graph, tasks):

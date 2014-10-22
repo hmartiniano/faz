@@ -24,7 +24,6 @@ def old_parser(text):
                 code = []
                 lexer = shlex.shlex(line[1:])
                 tokens = [token for token in lexer]
-                print tokens
                 found = False
                 found_interpreter = False
                 for token in tokens:

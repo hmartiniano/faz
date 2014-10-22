@@ -37,6 +37,11 @@ setup(
     ],
     package_dir={'yamt':
                  'yamt'},
+    entry_points={
+        'console_scripts': [
+            'yamt = yamt.main:main',
+        ]
+    },
     include_package_data=True,
     install_requires=requirements,
     license="BSD",

@@ -12,7 +12,7 @@ import glob
 
 import unittest
 
-from yamt import main
+from yamt import main, parser
 
 FILE1 = """
 # Using bash as the interpreter
@@ -118,6 +118,38 @@ class TestYamt(unittest.TestCase):
             os.unlink(fname)
 
 
+class TestMain(unittest.TestCase):
+
+    def setUp(self):
+        f = open("yamtfile", "w")
+        f.write(FILE1)
+        f.close()
+
+    def test_something(self):
+        main.main(arguments=[])
+
+    def tearDown(self):
+        for fname in glob.glob("file*"):
+            os.unlink(fname)
+        os.unlink("yamtfile")
+
+
+class TestMainDebug(unittest.TestCase):
+
+    def setUp(self):
+        f = open("yamtfile", "w")
+        f.write(FILE1)
+        f.close()
+
+    def test_something(self):
+        main.main(arguments=["-v"])
+
+    def tearDown(self):
+        for fname in glob.glob("file*"):
+            os.unlink(fname)
+        os.unlink("yamtfile")
+
+
 class TestMissingInput(unittest.TestCase):
 
     def setUp(self):
@@ -210,5 +242,18 @@ class TestWildcardInName(unittest.TestCase):
         pass
 
 
+class TestOldParser(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        tasks = parser.old_parser(FILE1)
+        self.failUnlessEqual(6, len(tasks))
+
+    def tearDown(self):
+        pass
+
+
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    unittest.main(verbosity=3)

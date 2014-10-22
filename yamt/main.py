@@ -44,9 +44,9 @@ def _create_parser():
     return parser
 
 
-def main():
+def main(arguments=sys.argv[1:]):
     parser = _create_parser()
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(arguments)
     if args.verbose:
         logging.basicConfig(
             format='%(levelname)s %(filename)s: %(message)s',
@@ -64,7 +64,3 @@ def main():
     with open(args.input_file) as f:
         input_file = f.read()
     yamt(input_file)
-
-
-if __name__ == '__main__':
-    main()

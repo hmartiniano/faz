@@ -13,7 +13,6 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 requirements = [
     "networkx==1.9.1",
-    "PyYAML==3.11",
     "argparse==1.2.1",
     "decorator==3.4.0",
     "networkx==1.9.1",
@@ -26,7 +25,7 @@ test_requirements = [
 
 setup(
     name='yamt',
-    version='0.0.1',
+    version='0.1.0',
     description='"A Make-like tool with a syntax similar to Drake."',
     long_description=readme + '\n\n' + history,
     author='Hugo Martiniano',

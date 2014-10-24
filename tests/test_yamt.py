@@ -32,7 +32,7 @@ echo "Hellow world! 3" > file7
 echo "Hellow world! 3" > file8
 
 # Now using python as the interpreter
-# file9, file10, file11 <- file5, file3 :python
+# file9, file10, file11 <- file5, file3 :python, force
 import sys
 
 a = [[range(3)], [range(4, 7)], [range(7, 10)]]
@@ -43,7 +43,7 @@ f.close()
 open("file9", "w").write("Hello from python\\n")
 open("file10", "w").write("Hello from python\\n")
 
-# file22, file33 <- file1, file11 [ruby]
+# file22, file33 <- file1, file11 :ruby
 File.open("file22", 'w') { |file| file.write("Hi Ruby22!") }
 File.open("file33", 'w') { |file| file.write("Hi Ruby33!") }
 """
@@ -149,7 +149,7 @@ class TestMainDebug(unittest.TestCase):
         f.close()
 
     def test_something(self):
-        main.main(arguments=["-v"])
+        main.main(arguments=["-d"])
 
     def tearDown(self):
         for fname in glob.glob("file*"):
@@ -268,10 +268,10 @@ class TestEnvironment(unittest.TestCase):
         pass
 
     def test_something(self):
-        env = parser.create_environment(FILE7)
-        self.failUnlessEqual(env.test, "1")
-        self.failUnlessEqual(env.a, "2")
-        self.failUnlessEqual(env.b, "3")
+        env = parser.create_environment(FILE7.splitlines())
+        self.failUnlessEqual(env["test"], "1")
+        self.failUnlessEqual(env["a"], "2")
+        self.failUnlessEqual(env["b"], "3")
 
     def tearDown(self):
         pass

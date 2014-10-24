@@ -32,7 +32,7 @@ echo "Hellow world! 3" > file7
 echo "Hellow world! 3" > file8
 
 # Now using python as the interpreter
-# file9, file10, file11 <- file5, file3 [python]
+# file9, file10, file11 <- file5, file3 :python
 import sys
 
 a = [[range(3)], [range(4, 7)], [range(7, 10)]]
@@ -102,6 +102,13 @@ touch file21 file22
 
 # file3, file4 <- file2*
 touch file3, file4
+"""
+
+
+FILE7 = """
+test = 1
+a = 2
+b = 3
 """
 
 
@@ -242,14 +249,29 @@ class TestWildcardInName(unittest.TestCase):
         pass
 
 
-class TestOldParser(unittest.TestCase):
+class TestParser(unittest.TestCase):
 
     def setUp(self):
         pass
 
     def test_something(self):
-        tasks = parser.old_parser(FILE1)
+        tasks = parser.parse_input_file(FILE1)
         self.failUnlessEqual(6, len(tasks))
+
+    def tearDown(self):
+        pass
+
+
+class TestEnvironment(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        env = parser.create_environment(FILE7)
+        self.failUnlessEqual(env.test, "1")
+        self.failUnlessEqual(env.a, "2")
+        self.failUnlessEqual(env.b, "3")
 
     def tearDown(self):
         pass

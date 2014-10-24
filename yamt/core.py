@@ -13,14 +13,6 @@ class FubarException(Exception):
     pass
 
 
-class Environment:
-
-    __shared_state = {}
-
-    def __init__(self):
-        self.__dict__ = self.__shared_state
-
-
 class Task(object):
 
     __dirname = ".yamt"
@@ -51,7 +43,7 @@ class Task(object):
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
         start = dt.now()
-        out = subprocess.check_output([self.interpreter, self.fname])
+        out = subprocess.check_output([self.interpreter, self.fname], env=self.environment)
         end = dt.now()
         print("***** execution time {}".format(str(end - start)))
         print("***** Output:\n{}".format(out))

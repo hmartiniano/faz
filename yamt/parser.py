@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import shlex
 import re
 import logging
 
@@ -30,7 +29,8 @@ def find_tasks(lines):
                 linenumbers.append(n)
                 for key in groupdict:
                     groupdict[key] = split_task_parameters(groupdict[key])
-                    logging.debug("{0}: {1}".format(key, ", ".join(groupdict[key])))
+                    logging.debug(
+                        "{0}: {1}".format(key, ", ".join(groupdict[key])))
                 tasks.append(groupdict)
     linenumbers.append(len(lines))
     return tasks, linenumbers

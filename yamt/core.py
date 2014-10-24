@@ -6,7 +6,7 @@ import subprocess
 from datetime import datetime as dt
 import networkx as nx
 from yamt.utils import (expand_filenames, files_exist,
-        dependencies_are_newer)
+                        dependencies_are_newer)
 
 
 class FubarException(Exception):
@@ -43,7 +43,8 @@ class Task(object):
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
         start = dt.now()
-        out = subprocess.check_output([self.interpreter, self.fname], env=self.environment)
+        out = subprocess.check_output([self.interpreter, self.fname],
+                                      env=self.environment)
         end = dt.now()
         print("***** execution time {}".format(str(end - start)))
         print("***** Output:\n{}".format(out))
@@ -56,11 +57,13 @@ class Task(object):
         """ Create a temporary file in the '.yamt' directory for
             the code to feed to the interpreter. """
         if not(os.path.exists(self.__dirname)):
+            logging.debug("Creating directory {}".format(self.__dirname))
             os.mkdir(self.__dirname)
         elif not(os.path.isdir(self.__dirname)):
             raise FubarException(
                 "There is a file called %s in this directory!!!" %
                 self.__dirname)
+        logging.debug("Creating file {}".format(self.fname))
         self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
 
     def __repr__(self):

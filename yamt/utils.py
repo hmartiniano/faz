@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import glob
-import logging
-import functools
 
 
 def expand_filenames(filenames):

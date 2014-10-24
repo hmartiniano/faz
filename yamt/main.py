@@ -45,9 +45,9 @@ def _create_parser():
 
 def main(arguments=sys.argv[1:]):
     print("\n*******************" +
-        "  Program Started at: " +
-        strftime("%Y-%m-%d %H:%M:%S") +
-                "  ******************\n\n")
+          "  Program Started at: " +
+          strftime("%Y-%m-%d %H:%M:%S") +
+          "  ******************\n\n")
     parser = _create_parser()
     args = parser.parse_args(arguments)
     if args.debug:
@@ -68,6 +68,6 @@ def main(arguments=sys.argv[1:]):
         input_file = f.read()
     yamt(input_file, variables=args.variables)
     print("\n********************" +
-        "  Program Ended at: " +
-        strftime("%Y-%m-%d %H:%M:%S") +
-                "  *******************\n\n")
+          "  Program Ended at: " +
+          strftime("%Y-%m-%d %H:%M:%S") +
+          "  *******************\n\n")

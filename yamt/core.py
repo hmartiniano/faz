@@ -3,32 +3,58 @@ import os
 import logging
 import tempfile
 import subprocess
+from datetime import datetime as dt
 import networkx as nx
-from yamt.utils import expand_filenames, files_exist, dependencies_are_newer
+from yamt.utils import (expand_filenames, files_exist,
+        dependencies_are_newer)
 
 
 class FubarException(Exception):
     pass
 
 
+class Environment:
+
+    __shared_state = {}
+
+    def __init__(self):
+        self.__dict__ = self.__shared_state
+
+
 class Task(object):
 
-    dirname = ".yamt"
+    __dirname = ".yamt"
 
-    def __init__(self, interpreter, inputs, outputs, code, comments=None):
-        self.interpreter = interpreter
+    def __init__(self, inputs, outputs, code, options, environment):
         self.inputs = expand_filenames(inputs)
         self.outputs = expand_filenames(outputs)
         self.code = code
-        self.comments = comments
+        self.options = options
+        self.environment = environment
         self.order = 0
+        self.force = False
+        self.check_options()
 
-    def execute(self):
+    def check_options(self):
+        interpreter = "bash"
+        for option in self.options:
+            if "python" in option:
+                interpreter = "python"
+            elif "ruby" in option:
+                interpreter = "ruby"
+            elif "force" in option:
+                self.force = True
+        self.interpreter = interpreter
+
+    def __call__(self):
         """ Invoque an interpreter to execute the code of a given task. """
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
+        start = dt.now()
         out = subprocess.check_output([self.interpreter, self.fname])
-        logging.info("Output from Task {0}\n{1}".format(self.order, out))
+        end = dt.now()
+        print("***** execution time {}".format(str(end - start)))
+        print("***** Output:\n{}".format(out))
         os.close(self.fd)
         os.unlink(self.fname)
         if not(files_exist(self.outputs)):
@@ -37,40 +63,45 @@ class Task(object):
     def mktemp_file(self):
         """ Create a temporary file in the '.yamt' directory for
             the code to feed to the interpreter. """
-        if not(os.path.exists(self.dirname)):
-            os.mkdir(self.dirname)
-        elif not(os.path.isdir(self.dirname)):
+        if not(os.path.exists(self.__dirname)):
+            os.mkdir(self.__dirname)
+        elif not(os.path.isdir(self.__dirname)):
             raise FubarException(
                 "There is a file called %s in this directory!!!" %
-                self.dirname)
-        self.fd, self.fname = tempfile.mkstemp(dir=self.dirname, text=True)
+                self.__dirname)
+        self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
 
     def __repr__(self):
-        return "%s <- %s [%s]" % (
-            ", ".join(self.outputs), ", ".join(self.inputs), self.interpreter)
+        return "%s <- %s :%s" % (
+            ", ".join(self.outputs),
+            ", ".join(self.inputs),
+            ", ".join(self.options))
 
 
 def execute(graph, tasks):
-    """ Given a dependency graph check inputs
-        and outputs and execute tasks if needed.
+    """
+    Given a dependency graph check inputs
+    and outputs and execute tasks if needed.
     """
     for node in nx.topological_sort(graph):
         task = tasks[node]
-        logging.info("Task {0}: {1}".format(task.order, task))
+        print(80 * "*")
+        print("\n ********** Task {0}: {1}\n".format(task.order, task))
         if files_exist(task.inputs) or len(task.inputs) == 0:
             if files_exist(task.outputs):
                 if dependencies_are_newer(task.outputs, task.inputs):
-                    logging.info(
+                    print(
                         "Dependencies are newer than outputs. Running task.")
-                    task.execute()
+                    task()
                 else:
-                    logging.info(
+                    print(
                         "Ouput file(s) exist and are older than inputs.")
             else:
-                logging.info("No ouput file(s). Running task.")
-                task.execute()
+                print("No ouput file(s). Running task.")
+                task()
         else:
-            logging.info("Not executing task. Input file(s) do not exist.")
+            print("Not executing task. Input file(s) do not exist.")
+        print(80 * "*")
 
 
 def dependency_graph(tasks):
@@ -94,12 +125,13 @@ def show_tasks(graph, tasks):
         task = tasks[node]
         task.predecessors = graph.predecessors(node)
         task.order = n
-        logging.info("Task {0}  ******************************".format(n))
-        logging.info("Predecessors: {0}".format(task.predecessors))
-        logging.info("Comments: {0}".format(task.comments))
-        logging.info("Interpreter: {0}".format(task.interpreter))
-        logging.info("Inputs: {0}".format(task.inputs))
-        logging.info("Outputs: {0}".format(task.outputs))
-        logging.info("Code:")
+        print("Task {0}  ******************************".format(n))
+        print("Predecessors: {0}".format(task.predecessors))
+        print("options: {0}".format(task.options))
+        print("Interpreter: {0}".format(task.interpreter))
+        print("Inputs: {0}".format(task.inputs))
+        print("Outputs: {0}".format(task.outputs))
+        print("Code:")
         for line in task.code:
-            logging.info("{0}".format(line))
+            print("{0}".format(line))
+    print("**************************************")

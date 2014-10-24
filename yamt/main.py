@@ -18,7 +18,7 @@ def yamt(input_file):
     """
     logging.debug("input file:\n {0}\n".format(input_file))
     tasks = parse_input_file(input_file)
-    logging.info("Found {0} tasks.".format(len(tasks)))
+    print("Found {0} tasks.".format(len(tasks)))
     graph = dependency_graph(tasks)
     for node in graph.nodes():
         logging.info(node)

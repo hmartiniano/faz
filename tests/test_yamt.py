@@ -112,6 +112,18 @@ b = 3
 """
 
 
+FILE8 = """
+file=asdf
+# Using bash as the interpreter
+# file21, file22 <-
+touch file21 file22
+touch $file
+
+# file3, file4 <- file2*, $file
+touch file3, file4
+"""
+
+
 class TestYamt(unittest.TestCase):
 
     def setUp(self):
@@ -272,6 +284,18 @@ class TestEnvironment(unittest.TestCase):
         self.failUnlessEqual(env["test"], "1")
         self.failUnlessEqual(env["a"], "2")
         self.failUnlessEqual(env["b"], "3")
+
+    def tearDown(self):
+        pass
+
+
+class TestVariableExpansion(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        main.yamt(FILE8)
 
     def tearDown(self):
         pass

@@ -6,7 +6,7 @@ import logging
 from yamt.core import Task
 
 
-TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, _\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, _\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, _\-\[\]\*]+)*"
+TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, \$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, \$_\-\[\]\*]+)*"
 
 
 def split_task_parameters(line):
@@ -39,13 +39,15 @@ def find_tasks(lines):
 def create_environment(preamble):
     environment = {}
     for line in preamble:
-        if " = " in line and not line.startswith("#"):
+        logging.debug(line)
+        if "=" in line and not line.startswith("#"):
             tmp = line.split("=")
             key = tmp[0].strip()
             value = tmp[1].strip()
             logging.debug(
                 "Found variable {} with value {}".format(key, value))
             environment.update({key: value})
+    logging.debug("Env {}".format(environment))
     return environment
 
 
@@ -54,6 +56,7 @@ def parse_input_file(text, variables=None):
     lines = text.splitlines()
     tasks, linenumbers = find_tasks(lines)
     preamble = [line for line in lines[:linenumbers[0]]]
+    logging.debug("Preamble:\n{}".format("\n".join(preamble)))
     if variables is not None:
         preamble += "\n" + "\n".join(variables)
     environment = create_environment(preamble)

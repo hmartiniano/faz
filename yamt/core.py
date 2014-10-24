@@ -19,8 +19,8 @@ class Task(object):
     __dirname = ".yamt"
 
     def __init__(self, inputs, outputs, code, options, environment):
-        self.inputs = self.check_filenames(expand_filenames(inputs))
-        self.outputs = self.check_filenames(expand_filenames(outputs))
+        self.inputs = inputs
+        self.outputs = outputs
         self.code = code
         self.options = options
         self.environment = environment
@@ -41,22 +41,49 @@ class Task(object):
 
     def check_filenames(self, filenames):
         result = []
-        for n, filename in enumerate(filename):
+        for n, filename in enumerate(filenames):
             if "$" in filename:
                 s = Template(filename)
                 result.append(s.substitute(**self.environment))
+                logging.debug(
+                    "Expanding {} to {}.".format(filename, result[-1]))
             else:
                 result.append(filename)
+        return result
+
+    def check_inputs(self):
+        self.inputs = self.check_filenames(expand_filenames(self.inputs))
+        result = False
+        if len(self.inputs) == 0 or files_exist(self.inputs):
+            result = True
+        else:
+            print("Not executing task. Input file(s) do not exist.")
+        return result
+
+    def check_outputs(self):
+        self.outputs = self.check_filenames(expand_filenames(self.outputs))
+        result = False
+        if files_exist(self.outputs):
+            if dependencies_are_newer(self.outputs, self.inputs):
+                result = True
+                print("Dependencies are newer than outputs. Running task.")
+            else:
+                print("Ouput file(s) exist and are older than inputs.")
+        else:
+            print("No ouput file(s). Running task.")
+            result = True
         return result
 
     def __call__(self):
         """ Invoque an interpreter to execute the code of a given task. """
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
+        logging.debug("Environment before task:\n{}".format(self.environment))
         start = dt.now()
         out = subprocess.check_output([self.interpreter, self.fname],
                                       env=self.environment)
         end = dt.now()
+        logging.debug("Environment after task:\n{}".format(self.environment))
         print("***** execution time {}".format(str(end - start)))
         print("***** Output:\n{}".format(out))
         os.close(self.fd)
@@ -74,8 +101,8 @@ class Task(object):
             raise FubarException(
                 "There is a file called %s in this directory!!!" %
                 self.__dirname)
-        logging.debug("Creating file {}".format(self.fname))
         self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
+        logging.debug("Creating file {}".format(self.fname))
 
     def __repr__(self):
         return "%s <- %s :%s" % (
@@ -93,20 +120,9 @@ def execute(graph, tasks):
         task = tasks[node]
         print(80 * "*")
         print("\n ********** Task {0}: {1}\n".format(task.order, task))
-        if files_exist(task.inputs) or len(task.inputs) == 0:
-            if files_exist(task.outputs):
-                if dependencies_are_newer(task.outputs, task.inputs):
-                    print(
-                        "Dependencies are newer than outputs. Running task.")
-                    task()
-                else:
-                    print(
-                        "Ouput file(s) exist and are older than inputs.")
-            else:
-                print("No ouput file(s). Running task.")
+        if task.check_inputs():
+            if task.check_outputs():
                 task()
-        else:
-            print("Not executing task. Input file(s) do not exist.")
         print(80 * "*")
 
 
@@ -135,6 +151,7 @@ def show_tasks(graph, tasks):
         print("Predecessors: {0}".format(task.predecessors))
         print("options: {0}".format(task.options))
         print("Interpreter: {0}".format(task.interpreter))
+        print("Environment: {0}".format(task.interpreter))
         print("Inputs: {0}".format(task.inputs))
         print("Outputs: {0}".format(task.outputs))
         print("Code:")

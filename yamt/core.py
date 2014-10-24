@@ -4,6 +4,7 @@ import logging
 import tempfile
 import subprocess
 from datetime import datetime as dt
+from string import Template
 import networkx as nx
 from yamt.utils import (expand_filenames, files_exist,
                         dependencies_are_newer)
@@ -18,8 +19,8 @@ class Task(object):
     __dirname = ".yamt"
 
     def __init__(self, inputs, outputs, code, options, environment):
-        self.inputs = expand_filenames(inputs)
-        self.outputs = expand_filenames(outputs)
+        self.inputs = self.check_filenames(expand_filenames(inputs))
+        self.outputs = self.check_filenames(expand_filenames(outputs))
         self.code = code
         self.options = options
         self.environment = environment
@@ -37,6 +38,16 @@ class Task(object):
             elif "force" in option:
                 self.force = True
         self.interpreter = interpreter
+
+    def check_filenames(self, filenames):
+        result = []
+        for n, filename in enumerate(filename):
+            if "$" in filename:
+                s = Template(filename)
+                result.append(s.substitute(**self.environment))
+            else:
+                result.append(filename)
+        return result
 
     def __call__(self):
         """ Invoque an interpreter to execute the code of a given task. """

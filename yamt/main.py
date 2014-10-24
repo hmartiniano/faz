@@ -44,12 +44,12 @@ def _create_parser():
 
 
 def main(arguments=sys.argv[1:]):
+    parser = _create_parser()
+    args = parser.parse_args(arguments)
     print("\n*******************" +
           "  Program Started at: " +
           strftime("%Y-%m-%d %H:%M:%S") +
           "  ******************\n\n")
-    parser = _create_parser()
-    args = parser.parse_args(arguments)
     if args.debug:
         logging.basicConfig(
             format='%(levelname)s %(filename)s: %(message)s',

@@ -1,173 +1,129 @@
+# -*- coding: utf-8 -*-
 import os
-import shlex
+import logging
 import tempfile
 import subprocess
+from datetime import datetime as dt
 import networkx as nx
+from yamt.utils import (expand_filenames, files_exist,
+        dependencies_are_newer)
 
 
 class FubarException(Exception):
     pass
 
 
-def parser(text):
-    """ Very crude parser for afile with syntax similar to Drake."""
-    tasks = []
-    code = []
-    task_found = False
-    for line in text.splitlines():
-        if line.startswith("#"):
-            interpreter = "bash"
-            if task_found:
-                tasks.append((interpreter, inputs, outputs, code))
-            inputs = []
-            outputs = []
-            code = []
-            lexer = shlex.shlex(line[1:])
-            tokens = [token for token in lexer]
-            print tokens
-            found = False
-            found_interpreter = False
-            for token in tokens:
-                if "]" in token:
-                    break
-                elif found_interpreter:
-                    interpreter = token
-                    found_interpreter = False
-                elif "[" in token:
-                    found_interpreter = True
-                elif "<" in token or "-" in token:
-                    found = True
-                elif "," in token:
-                    continue
-                elif found:
-                    inputs.append(token)
+class Task(object):
+
+    __dirname = ".yamt"
+
+    def __init__(self, inputs, outputs, code, options, environment):
+        self.inputs = expand_filenames(inputs)
+        self.outputs = expand_filenames(outputs)
+        self.code = code
+        self.options = options
+        self.environment = environment
+        self.order = 0
+        self.force = False
+        self.check_options()
+
+    def check_options(self):
+        interpreter = "bash"
+        for option in self.options:
+            if "python" in option:
+                interpreter = "python"
+            elif "ruby" in option:
+                interpreter = "ruby"
+            elif "force" in option:
+                self.force = True
+        self.interpreter = interpreter
+
+    def __call__(self):
+        """ Invoque an interpreter to execute the code of a given task. """
+        self.mktemp_file()
+        os.write(self.fd, "\n".join(self.code) + "\n")
+        start = dt.now()
+        out = subprocess.check_output([self.interpreter, self.fname], env=self.environment)
+        end = dt.now()
+        print("***** execution time {}".format(str(end - start)))
+        print("***** Output:\n{}".format(out))
+        os.close(self.fd)
+        os.unlink(self.fname)
+        if not(files_exist(self.outputs)):
+            raise FubarException("Output files not created for Task %s" % self)
+
+    def mktemp_file(self):
+        """ Create a temporary file in the '.yamt' directory for
+            the code to feed to the interpreter. """
+        if not(os.path.exists(self.__dirname)):
+            os.mkdir(self.__dirname)
+        elif not(os.path.isdir(self.__dirname)):
+            raise FubarException(
+                "There is a file called %s in this directory!!!" %
+                self.__dirname)
+        self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
+
+    def __repr__(self):
+        return "%s <- %s :%s" % (
+            ", ".join(self.outputs),
+            ", ".join(self.inputs),
+            ", ".join(self.options))
+
+
+def execute(graph, tasks):
+    """
+    Given a dependency graph check inputs
+    and outputs and execute tasks if needed.
+    """
+    for node in nx.topological_sort(graph):
+        task = tasks[node]
+        print(80 * "*")
+        print("\n ********** Task {0}: {1}\n".format(task.order, task))
+        if files_exist(task.inputs) or len(task.inputs) == 0:
+            if files_exist(task.outputs):
+                if dependencies_are_newer(task.outputs, task.inputs):
+                    print(
+                        "Dependencies are newer than outputs. Running task.")
+                    task()
                 else:
-                    outputs.append(token)
-            task_found = True
+                    print(
+                        "Ouput file(s) exist and are older than inputs.")
+            else:
+                print("No ouput file(s). Running task.")
+                task()
         else:
-            code.append(line)
-    if task_found:
-        tasks.append((interpreter, inputs, outputs, code))
-    return tasks
+            print("Not executing task. Input file(s) do not exist.")
+        print(80 * "*")
 
 
 def dependency_graph(tasks):
-    """ Produce a dependency graph based on a list of tasks produced by the parser."""
+    """ Produce a dependency graph based on a list
+        of tasks produced by the parser.
+    """
     graph = nx.MultiDiGraph()
     for i in range(len(tasks)):
         graph.add_node(i)
     for node1 in graph.nodes():
         for node2 in graph.nodes():
-            for input in tasks[node1][1]:
-                for output in tasks[node2][2]:
+            for input in tasks[node1].inputs:
+                for output in tasks[node2].outputs:
                     if output == input:
                         graph.add_edge(node2, node1)
-#    for interpreter, inputs, outputs, code in tasks:
-#        node_name = ", ".join(outputs) + " <- " + ", ".join(inputs)
-#        graph.add_node(node_name, interpreter=interpreter, inputs=inputs, outputs=outputs, code=code)
-#        graph[node_name]["interpreter"] = interpreter
-#        graph[node_name]["inputs"] = inputs
-#        graph[node_name]["outputs"] = outputs
-#        graph[node_name]["code"] = code
-#    for node1 in graph.nodes():
-#        for node2 in graph.nodes():
-#            for input in graph[node1]["inputs"]:
-#                for output in graph[node2]["outputs"]:
-#                    if output == input:
-#                        graph.add_edge(node2, node1)
     return graph
 
 
-def show_graph(graph, tasks):
-    for node in nx.topological_sort(graph):
-        print node, tasks[node]
-        print "Predecessors:", graph.predecessors(node)
-        #print "Antecesssors:", graph.antecessors(node)
-        #print dir(graph[node])
-
-
-def mktemp_dir():
-    """ Check if the '.yamt' directory exists and create it if necessary.
-        If a file exists with the same name raise an exception. """
-    if not(os.path.exists(".yamt")):
-        os.mkdir("./yamt")
-    elif not(os.path.isdir(".yamt")):
-        raise FubarException("there is a file called .yamt in this directory!!!")
-
-
-def mktemp_file(dirname=".yamt"):
-    """ Create a temporary file in the '.yamt' directory for the code to feed to the interpreter. """
-    if not(os.path.exists(dirname)):
-        os.mkdir(dirname)
-    elif not(os.path.isdir(dirname)):
-        raise FubarException("There is a file called %s in this directory!!!" % dirname)
-    fd, fname = tempfile.mkstemp(dir=dirname, text=True)
-    return fd, fname
-
-
-def execute_task(interpreter, inputs, outputs, code):
-    """ Invoque an interpreter to execute the code of a given task. """
-    fd, fname = mktemp_file()
-    os.write(fd, "\n".join(code) + "\n")
-    out = subprocess.check_output([interpreter, fname])
-    print out
-    os.close(fd)
-    os.unlink(fname)
-
-
-def execute(graph, tasks):
-    """ Given a dependency graph check inputs and outputs and execute tasks. """
-    for node in nx.topological_sort(graph):
-        print node, tasks[node]
-        interpreter = tasks[node][0]
-        inputs = tasks[node][1]
-        outputs = tasks[node][2]
-        code = tasks[node][3]
-        if files_exist(inputs):
-            if files_exist(outputs):
-                if dependencies_are_newer(outputs, inputs):
-                    print "Dependencies are newer than outputs. Running task"
-                    execute_task(interpreter, inputs, outputs, code)
-                else:
-                    print "Ouputs exist and are older than inputs."
-            else:
-                print "No ouputs. Running task."
-                execute_task(interpreter, inputs, outputs, code)
-        else:
-            print "Not executing task. Input files do not exist."
-
-
-def files_exist(filenames):
-    """ Check if all files in a given list exist. """
-    return all([os.path.exists(filename) and os.path.isfile(filename) for filename in filenames])
-
-
-def dependencies_are_newer(files, dependencies):
-    """ For two lists of files, check if any file in the second list is newer than any file o the first. """
-    dependency_mtimes = [os.path.getmtime(filename) for filename in dependencies]
-    file_mtimes = [os.path.getmtime(filename) for filename in files]
-    results = []
-    for file_mtime in file_mtimes:
-        for dependency_mtime in dependency_mtimes:
-            if dependency_mtime > file_mtime:
-                results.append(True)
-            else:
-                results.append(False)
-    return any(results)
-
-
-def main(filename):
-    tasks = parser(open(filename).read())
-    for task in tasks:
-        print task
-    graph = dependency_graph(tasks)
-    for node in graph.nodes():
-        print node
-        print tasks[node]
-    show_graph(graph, tasks)
-    execute(graph, tasks)
-
-
-if __name__ == '__main__':
-    import sys
-    main(sys.argv[1])
+def show_tasks(graph, tasks):
+    for n, node in enumerate(nx.topological_sort(graph)):
+        task = tasks[node]
+        task.predecessors = graph.predecessors(node)
+        task.order = n
+        print("Task {0}  ******************************".format(n))
+        print("Predecessors: {0}".format(task.predecessors))
+        print("options: {0}".format(task.options))
+        print("Interpreter: {0}".format(task.interpreter))
+        print("Inputs: {0}".format(task.inputs))
+        print("Outputs: {0}".format(task.outputs))
+        print("Code:")
+        for line in task.code:
+            print("{0}".format(line))
+    print("**************************************")

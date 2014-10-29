@@ -2,8 +2,9 @@
 import os
 import glob
 import logging
-import tempfile
+import re
 import subprocess
+import tempfile
 from datetime import datetime as dt
 from string import Template
 import networkx as nx
@@ -13,7 +14,7 @@ class TaskFailedException(Exception):
     pass
 
 
-class TemDirIsFileException(Exception):
+class TempDirIsFileException(Exception):
     pass
 
 
@@ -79,6 +80,22 @@ class Task(object):
             result = True
         return result
 
+    def expand_variables(self):
+        """
+        Expand variables in the task code.
+        Only variables who use the $[<variable name>] format are expanded.
+        Variables using the $<variable name> and ${<variable name>} formats
+        are expanded by the shell (in the cases where bash is the interpreter.
+        """
+        pattern = re.compile(r"\$\[([a-zA-Z0-9_]+)\]")
+        for n, line in enumerate(self.code):
+            m = pattern.findall(line)
+            if len(m) > 0:
+                for match in m:
+                    value = self.environment.get(match)
+                    if value is not None:
+                        self.code[n] = line.replace("$[" + match + "]", value)
+
     def expand_filenames(self, filenames):
         """
         Expand a list of filenames using shell expansion.
@@ -121,6 +138,7 @@ class Task(object):
 
     def __call__(self):
         """ Invoque an interpreter to execute the code of a given task. """
+        self.expand_variables()
         self.mktemp_file()
         os.write(self.fd, "\n".join(self.code) + "\n")
         logging.debug("Environment before task:\n{}".format(self.environment))
@@ -133,6 +151,7 @@ class Task(object):
         print("***** Output:\n{}".format(out))
         os.close(self.fd)
         os.unlink(self.fname)
+        self.outputs = self.expand_filenames(self.check_filenames(self.outputs))
         if not(self.files_exist(self.outputs)):
             print("Output files:")
             for filename in self.outputs:
@@ -183,9 +202,9 @@ def dependency_graph(tasks):
         graph.add_node(i)
     for node1 in graph.nodes():
         for node2 in graph.nodes():
-            for input in tasks[node1].inputs:
-                for output in tasks[node2].outputs:
-                    if output == input:
+            for input_file in tasks[node1].inputs:
+                for output_file in tasks[node2].outputs:
+                    if output_file == input_file:
                         graph.add_edge(node2, node1)
     return graph
 

@@ -13,7 +13,7 @@ import time
 import unittest
 
 from yamt import main, parser
-from yamt.core import Task
+from yamt.core import Task, TaskFailedException
 
 FILE1 = """
 # Using bash as the interpreter
@@ -328,9 +328,25 @@ class TestTaskMethods(unittest.TestCase):
             open(filename, "w")
         self.task = Task(["file[0-3]", "file_*"],
                          ["file[4-6]"],
-                         ["touch file4\n", "touch file5\n", "touch file6\n"],
+                         ["touch file4\n", "touch file5\n", "touch file6\n", "echo $[test_var]\n", "echo $test_var\n"],
                          ["force"],
                          {"test_var": "test_var_value"})
+
+    def test_code_variable_expansion(self):
+        self.task.expand_variables()
+        self.assertTrue(any([line for line in self.task.code if "test_var_value" in line]))
+
+    def outputs_do_not_exist(self):
+        task = Task(["file[0-3]", "file_*"],
+                    ["file99", "file234"],
+                    ["touch file4\n", "touch file5\n", "touch file6\n"],
+                    ["force"],
+                    {"test_var": "test_var_value"})
+        with self.assertRaises(TaskFailedException):
+            task()
+
+    def test_task(self):
+        self.task()
 
     def test_files_exist(self):
         self.assertTrue(self.task.files_exist(["file1", "file2", "file3"]))

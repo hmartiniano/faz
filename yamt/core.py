@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 import os
+import glob
 import logging
 import tempfile
 import subprocess
 from datetime import datetime as dt
 from string import Template
 import networkx as nx
-from yamt.utils import (expand_filenames, files_exist,
-                        dependencies_are_newer)
 
 
-class FubarException(Exception):
+class TaskFailedException(Exception):
+    pass
+
+
+class TemDirIsFileException(Exception):
     pass
 
 
@@ -31,11 +34,11 @@ class Task(object):
     def check_options(self):
         interpreter = "bash"
         for option in self.options:
-            if "python" in option:
+            if "python" in option.lower():
                 interpreter = "python"
-            elif "ruby" in option:
+            elif "ruby" in option.lower():
                 interpreter = "ruby"
-            elif "force" in option:
+            elif "force" in option.lower():
                 self.force = True
         self.interpreter = interpreter
 
@@ -52,19 +55,21 @@ class Task(object):
         return result
 
     def check_inputs(self):
-        self.inputs = self.check_filenames(expand_filenames(self.inputs))
+        """ Check for the existence of input files """
+        self.inputs = self.expand_filenames(self.check_filenames(self.inputs))
         result = False
-        if len(self.inputs) == 0 or files_exist(self.inputs):
+        if len(self.inputs) == 0 or self.files_exist(self.inputs):
             result = True
         else:
             print("Not executing task. Input file(s) do not exist.")
         return result
 
     def check_outputs(self):
-        self.outputs = self.check_filenames(expand_filenames(self.outputs))
+        """ Check for the existence of output files """
+        self.outputs = self.expand_filenames(self.check_filenames(self.outputs))
         result = False
-        if files_exist(self.outputs):
-            if dependencies_are_newer(self.outputs, self.inputs):
+        if self.files_exist(self.outputs):
+            if self.dependencies_are_newer(self.outputs, self.inputs):
                 result = True
                 print("Dependencies are newer than outputs. Running task.")
             else:
@@ -73,6 +78,46 @@ class Task(object):
             print("No ouput file(s). Running task.")
             result = True
         return result
+
+    def expand_filenames(self, filenames):
+        """
+        Expand a list of filenames using shell expansion.
+        """
+        results = []
+        for filename in filenames:
+            if any([pattern in filename for pattern in "*[]?"]):
+                expanded = glob.glob(filename)
+                if len(expanded) > 0:
+                    results.extend(expanded)
+                else:
+                    results.append("NONEXISTENT")
+            else:
+                results.append(filename)
+        return sorted(list(set(results)))
+
+    def files_exist(self, filenames):
+        """ Check if all files in a given list exist. """
+        return all([os.path.exists(filename) and os.path.isfile(filename)
+                    for filename in filenames])
+
+    def dependencies_are_newer(self, files, dependencies):
+        """
+        For two lists of files, check if any file in the
+        second list is newer than any file of the first.
+        """
+        dependency_mtimes = [
+            os.path.getmtime(filename) for filename in dependencies]
+        file_mtimes = [os.path.getmtime(filename) for filename in files]
+        results = []
+        for file_mtime in file_mtimes:
+            for dependency_mtime in dependency_mtimes:
+                if dependency_mtime > file_mtime:
+                    print(dependency_mtime, file_mtime)
+                    results.append(True)
+                else:
+                    print(dependency_mtime, file_mtime)
+                    results.append(False)
+        return any(results)
 
     def __call__(self):
         """ Invoque an interpreter to execute the code of a given task. """
@@ -88,8 +133,11 @@ class Task(object):
         print("***** Output:\n{}".format(out))
         os.close(self.fd)
         os.unlink(self.fname)
-        if not(files_exist(self.outputs)):
-            raise FubarException("Output files not created for Task %s" % self)
+        if not(self.files_exist(self.outputs)):
+            print("Output files:")
+            for filename in self.outputs:
+                print("{}: {}".format(filename, os.path.exists(filename)))
+            raise TaskFailedException("Output files not created for Task %s" % self)
 
     def mktemp_file(self):
         """ Create a temporary file in the '.yamt' directory for
@@ -98,7 +146,7 @@ class Task(object):
             logging.debug("Creating directory {}".format(self.__dirname))
             os.mkdir(self.__dirname)
         elif not(os.path.isdir(self.__dirname)):
-            raise FubarException(
+            raise TempDirIsFileException(
                 "There is a file called %s in this directory!!!" %
                 self.__dirname)
         self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)

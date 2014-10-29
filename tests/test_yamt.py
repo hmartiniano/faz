@@ -9,10 +9,11 @@ Tests for `yamt` module.
 """
 import os
 import glob
-
+import time
 import unittest
 
 from yamt import main, parser
+from yamt.core import Task
 
 FILE1 = """
 # Using bash as the interpreter
@@ -88,7 +89,7 @@ touch file5
 touch file1 file2
 
 # file3, file4 <- file1, file2
-touch file3, file4
+touch file3 file4
 
 # file5 <- file3, file4
 touch file5
@@ -101,7 +102,7 @@ FILE6 = """
 touch file21 file22
 
 # file3, file4 <- file2*
-touch file3, file4
+touch file3 file4
 """
 
 
@@ -120,7 +121,7 @@ touch file21 file22
 touch $file
 
 # file3, file4 <- file2*, $file
-touch file3, file4
+touch file3 file4
 """
 
 
@@ -299,6 +300,67 @@ class TestVariableExpansion(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+
+class TestTaskMethods(unittest.TestCase):
+
+    def setUp(self):
+        self.filenames = ["file1",
+                          "file2",
+                          "file3",
+                          "file_1",
+                          "file_2",
+                          "file_3",
+                          "file__1",
+                          "file__2",
+                          ]
+        self.should_not_be_present = ["file4",
+                                      "file5",
+                                      "file6",
+                                      "file7",
+                                      "file8",
+                                      "file9",
+                                      ]
+        for filename in self.should_not_be_present:
+            if os.path.exists(filename) and os.path.isfile(filename):
+                os.unlink(filename)
+        for filename in self.filenames:
+            open(filename, "w")
+        self.task = Task(["file[0-3]", "file_*"],
+                         ["file[4-6]"],
+                         ["touch file4\n", "touch file5\n", "touch file6\n"],
+                         ["force"],
+                         {"test_var": "test_var_value"})
+
+    def test_files_exist(self):
+        self.assertTrue(self.task.files_exist(["file1", "file2", "file3"]))
+
+    def test_filename_shell_expansion(self):
+        results = self.task.expand_filenames(["file[0-3]", "file_?", "file__*"])
+        for result, filename in zip(results, self.filenames):
+            self.assertEqual(result, filename)
+
+    def test_filename_variable_expansion(self):
+        results = self.task.check_filenames(["$test_var"])
+        self.assertEqual(results[0], "test_var_value")
+
+    def test_nonexistant_file(self):
+        results = self.task.expand_filenames(["file[4-9]"])
+        self.assertEqual(results[0], "NONEXISTENT")
+
+    def test_dependencies_are_newer(self):
+        [open(filename, "w") for filename in ["old_file1", "old_file2"]]
+        time.sleep(0.1)
+        [open(filename, "w") for filename in ["new_file1", "new_file2"]]
+        result = self.task.dependencies_are_newer(["old_file1", "old_file2"],
+                                                  ["new_file1", "new_file2"])
+        self.assertTrue(result)
+        [os.unlink(filename) for filename in ["old_file1", "old_file2"]]
+        [os.unlink(filename) for filename in ["new_file1", "new_file2"]]
+
+    def tearDown(self):
+        for filename in self.filenames:
+            os.unlink(filename)
 
 
 if __name__ == '__main__':

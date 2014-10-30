@@ -30,6 +30,9 @@ class Task(object):
         self.environment = environment
         self.order = 0
         self.force = False
+        self.fdesc = None
+        self.fname = None
+        self.interpreter = None
         self.check_options()
 
     def check_options(self):
@@ -45,10 +48,10 @@ class Task(object):
 
     def check_filenames(self, filenames):
         result = []
-        for n, filename in enumerate(filenames):
+        for filename in filenames:
             if "$" in filename:
-                s = Template(filename)
-                result.append(s.substitute(**self.environment))
+                template = Template(filename)
+                result.append(template.substitute(**self.environment))
                 logging.debug(
                     "Expanding {} to {}.".format(filename, result[-1]))
             else:
@@ -72,11 +75,18 @@ class Task(object):
         if self.files_exist(self.outputs):
             if self.dependencies_are_newer(self.outputs, self.inputs):
                 result = True
-                print("Dependencies are newer than outputs. Running task.")
+                print("Dependencies are newer than outputs.")
+                print("Running task.")
             else:
-                print("Ouput file(s) exist and are older than inputs.")
+                if "force" in self.options:
+                    print("Ouput file(s) exist and are newer than inputs, but 'force' option present.")
+                    print("Running task.")
+                    result = True
+                else:
+                    print("Ouput file(s) exist and are newer than inputs.")
         else:
-            print("No ouput file(s). Running task.")
+            print("No ouput file(s).")
+            print("Running task.")
             result = True
         return result
 
@@ -89,12 +99,12 @@ class Task(object):
         """
         pattern = re.compile(r"\$\[([a-zA-Z0-9_]+)\]")
         for n, line in enumerate(self.code):
-            m = pattern.findall(line)
-            if len(m) > 0:
-                for match in m:
-                    value = self.environment.get(match)
+            match = pattern.findall(line)
+            if len(match) > 0:
+                for item in match:
+                    value = self.environment.get(item)
                     if value is not None:
-                        self.code[n] = line.replace("$[" + match + "]", value)
+                        self.code[n] = line.replace("$[" + item + "]", value)
 
     def expand_filenames(self, filenames):
         """
@@ -129,10 +139,8 @@ class Task(object):
         for file_mtime in file_mtimes:
             for dependency_mtime in dependency_mtimes:
                 if dependency_mtime > file_mtime:
-                    print(dependency_mtime, file_mtime)
                     results.append(True)
                 else:
-                    print(dependency_mtime, file_mtime)
                     results.append(False)
         return any(results)
 
@@ -140,7 +148,7 @@ class Task(object):
         """ Invoque an interpreter to execute the code of a given task. """
         self.expand_variables()
         self.mktemp_file()
-        os.write(self.fd, "\n".join(self.code) + "\n")
+        os.write(self.fdesc, "\n".join(self.code) + "\n")
         logging.debug("Environment before task:\n{}".format(self.environment))
         start = dt.now()
         out = subprocess.check_output([self.interpreter, self.fname],
@@ -149,7 +157,7 @@ class Task(object):
         logging.debug("Environment after task:\n{}".format(self.environment))
         print("***** execution time {}".format(str(end - start)))
         print("***** Output:\n{}".format(out))
-        os.close(self.fd)
+        os.close(self.fdesc)
         os.unlink(self.fname)
         self.outputs = self.expand_filenames(self.check_filenames(self.outputs))
         if not(self.files_exist(self.outputs)):
@@ -168,7 +176,7 @@ class Task(object):
             raise TempDirIsFileException(
                 "There is a file called %s in this directory!!!" %
                 self.__dirname)
-        self.fd, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
+        self.fdesc, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
         logging.debug("Creating file {}".format(self.fname))
 
     def __repr__(self):

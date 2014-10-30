@@ -28,14 +28,6 @@ yamt.parser module
     :undoc-members:
     :show-inheritance:
 
-yamt.util module
-----------------
-
-.. automodule:: yamt.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

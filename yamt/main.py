@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
+import os
 import sys
 from time import strftime
 
@@ -12,6 +13,27 @@ from yamt.core import execute, dependency_graph, show_tasks
 
 logger = logging.getLogger(__name__)
 
+
+BANNER = """
+ .----------------.  .----------------.  .----------------.  .----------------.
+| .--------------. || .--------------. || .--------------. || .--------------. |
+| |  ____  ____  | || |      __      | || | ____    ____ | || |  _________   | |
+| | |_  _||_  _| | || |     /  \     | || ||_   \  /   _|| || | |  _   _  |  | |
+| |   \ \  / /   | || |    / /\ \    | || |  |   \/   |  | || | |_/ | | \_|  | |
+| |    \ \/ /    | || |   / ____ \   | || |  | |\  /| |  | || |     | |      | |
+| |    _|  |_    | || | _/ /    \ \_ | || | _| |_\/_| |_ | || |    _| |_     | |
+| |   |______|   | || ||____|  |____|| || ||_____||_____|| || |   |_____|    | |
+| |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------'
+
+"Yet Another Make Tool"
+
+Developed by:
+    Hugo Martiniano
+
+
+"""
 
 def yamt(input_file, variables=None):
     """
@@ -46,6 +68,10 @@ def _create_parser():
 def main(arguments=sys.argv[1:]):
     parser = _create_parser()
     args = parser.parse_args(arguments)
+    print(BANNER)
+    if not(os.path.exists(args.input_file)):
+        print("file {} does not exist!\n".format(args.input_file))
+        sys.exit(1)
     print("\n*******************" +
           "  Program Started at: " +
           strftime("%Y-%m-%d %H:%M:%S") +

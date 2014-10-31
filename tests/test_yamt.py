@@ -345,6 +345,9 @@ class TestTaskMethods(unittest.TestCase):
                          ["force"],
                          {"test_var": "test_var_value"})
 
+    def test_task(self):
+        self.task()
+
     def test_code_variable_expansion(self):
         self.task.expand_variables()
         self.assertTrue(any([line for line in self.task.code if "test_var_value" in line]))
@@ -358,24 +361,41 @@ class TestTaskMethods(unittest.TestCase):
         with self.assertRaises(TaskFailedException):
             task()
 
+    def test_return_code_is_not_0(self):
+        task = Task(["file[0-3]", "file_*"],
+                    ["file99", "file234"],
+                    ["touch file4\n",
+                    "touch file5\n",
+                    "touch file6\n",
+                    "ls non_existant_dir\n"],
+                    ["force"],
+                    {"test_var": "test_var_value"})
+        with self.assertRaises(TaskFailedException):
+            task()
+
     def test_use_the_force(self):
-        f = open("file33", "w")
-        time.sleep(0.1)
         f = open("file22", "w")
         f.close()
-        self.assertTrue(os.path.getmtime("file33") < os.path.getmtime("file22"))
+        time.sleep(0.1)
+        f = open("file33", "w")
+        f.close()
+        self.assertTrue(os.path.getmtime("file33") > os.path.getmtime("file22"))
         task = Task(["file22"],
                     ["file33"],
                     ["touch file33\n"],
                     ["force"],
                     {"test_var": "test_var_value"})
+        result = self.task.dependencies_are_newer(["file33"], ["file22"])
+        self.assertFalse(result)
+        self.assertTrue(task.inputs == ["file22"])
+        self.assertTrue(task.outputs == ["file33"])
+        self.assertTrue(task.code == ["touch file33\n"])
+        self.assertTrue(task.options == ["force"])
+        self.assertTrue(task.interpreter == "bash")
         self.assertTrue(task.force)
         task()
         os.unlink("file22")
         os.unlink("file33")
-
-    def test_task(self):
-        self.task()
 
     def test_files_exist(self):
         self.assertTrue(self.task.files_exist(["file1", "file2", "file3"]))
@@ -400,6 +420,16 @@ class TestTaskMethods(unittest.TestCase):
         result = self.task.dependencies_are_newer(["old_file1", "old_file2"],
                                                   ["new_file1", "new_file2"])
         self.assertTrue(result)
+        [os.unlink(filename) for filename in ["old_file1", "old_file2"]]
+        [os.unlink(filename) for filename in ["new_file1", "new_file2"]]
+
+    def test_dependencies_are_older(self):
+        [open(filename, "w") for filename in ["new_file1", "new_file2"]]
+        time.sleep(0.1)
+        [open(filename, "w") for filename in ["old_file1", "old_file2"]]
+        result = self.task.dependencies_are_newer(["old_file1", "old_file2"],
+                                                  ["new_file1", "new_file2"])
+        self.assertFalse(result)
         [os.unlink(filename) for filename in ["old_file1", "old_file2"]]
         [os.unlink(filename) for filename in ["new_file1", "new_file2"]]
 

@@ -25,6 +25,7 @@ class Task(object):
     def __init__(self, inputs, outputs, code, options, environment):
         self.inputs = inputs
         self.outputs = outputs
+        self.original_outputs = outputs
         self.code = code
         self.options = options
         self.environment = environment
@@ -77,13 +78,12 @@ class Task(object):
                 result = True
                 print("Dependencies are newer than outputs.")
                 print("Running task.")
+            elif self.force:
+                print("Dependencies are older than inputs, but 'force' option present.")
+                print("Running task.")
+                result = True
             else:
-                if self.force:
-                    print("Ouput file(s) are older than inputs, but 'force' option present.")
-                    print("Running task.")
-                    result = True
-                else:
-                    print("Ouput file(s) are older than inputs.")
+                print("Dependencies are older than inputs.")
         else:
             print("No ouput file(s).")
             print("Running task.")
@@ -135,36 +135,44 @@ class Task(object):
         dependency_mtimes = [
             os.path.getmtime(filename) for filename in dependencies]
         file_mtimes = [os.path.getmtime(filename) for filename in files]
-        results = []
+        result = False
         for file_mtime in file_mtimes:
             for dependency_mtime in dependency_mtimes:
                 if dependency_mtime > file_mtime:
-                    results.append(True)
-                else:
-                    results.append(False)
-        return any(results)
+                    result = True
+        return result
 
     def __call__(self):
-        """ Invoque an interpreter to execute the code of a given task. """
-        self.expand_variables()
-        self.mktemp_file()
-        os.write(self.fdesc, "\n".join(self.code) + "\n")
-        logging.debug("Environment before task:\n{}".format(self.environment))
-        start = dt.now()
-        out = subprocess.check_output([self.interpreter, self.fname],
-                                      env=self.environment)
-        end = dt.now()
-        logging.debug("Environment after task:\n{}".format(self.environment))
-        print("***** execution time {}".format(str(end - start)))
-        print("***** Output:\n{}".format(out))
-        os.close(self.fdesc)
-        os.unlink(self.fname)
-        self.outputs = self.expand_filenames(self.check_filenames(self.outputs))
-        if not(self.files_exist(self.outputs)):
-            print("Output files:")
-            for filename in self.outputs:
-                print("{}: {}".format(filename, os.path.exists(filename)))
-            raise TaskFailedException("Output files not created for Task %s" % self)
+        """ Invoque an interpreter to execute the task's code. """
+        print("\n ********** Task {0}: {1}\n".format(self.order, self))
+        if self.check_inputs() and self.check_outputs():
+            self.expand_variables()
+            self.mktemp_file()
+            os.write(self.fdesc, "\n".join(self.code) + "\n")
+            logging.debug("Environment before task:\n{}".format(self.environment))
+            print("Task inputs: {}\n".format(self.inputs))
+            print("Task outputs: {}\n".format(self.outputs))
+            start = dt.now()
+            try:
+                out = subprocess.check_output([self.interpreter, self.fname],
+                                              env=self.environment)
+            except subprocess.CalledProcessError as e:
+                print("Task {} failed with return code {}\n".format(self, e.returncode))
+                print("Output from task:\n")
+                print(e.output)
+                raise TaskFailedException("Task {} failed.\n".format(self))
+            end = dt.now()
+            logging.debug("Environment after task:\n{}".format(self.environment))
+            print("***** execution time {}".format(str(end - start)))
+            print("***** Output:\n{}".format(out))
+            os.close(self.fdesc)
+            os.unlink(self.fname)
+            self.outputs = self.expand_filenames(self.check_filenames(self.original_outputs))
+            if not(self.files_exist(self.outputs)):
+                print("Output files:")
+                for filename in self.outputs:
+                    print("{}: {}".format(filename, os.path.exists(filename)))
+                raise TaskFailedException("Output files not created for Task {}\n".format(self))
 
     def mktemp_file(self):
         """ Create a temporary file in the '.yamt' directory for
@@ -193,11 +201,9 @@ def execute(graph, tasks):
     """
     for node in nx.topological_sort(graph):
         task = tasks[node]
+        task.order = node
         print(80 * "*")
-        print("\n ********** Task {0}: {1}\n".format(task.order, task))
-        if task.check_inputs():
-            if task.check_outputs():
-                task()
+        task()
         print(80 * "*")
 
 

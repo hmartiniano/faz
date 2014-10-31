@@ -35,6 +35,7 @@ Developed by:
 
 """
 
+
 def yamt(input_file, variables=None):
     """
     YAMT program entry point.
@@ -70,8 +71,7 @@ def main(arguments=sys.argv[1:]):
     args = parser.parse_args(arguments)
     print(BANNER)
     if not(os.path.exists(args.input_file)):
-        print("file {} does not exist!\n".format(args.input_file))
-        sys.exit(1)
+        raise IOError("file {} does not exist!\n".format(args.input_file))
     print("\n*******************" +
           "  Program Started at: " +
           strftime("%Y-%m-%d %H:%M:%S") +

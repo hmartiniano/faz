@@ -154,6 +154,19 @@ class TestMain(unittest.TestCase):
         os.unlink("yamtfile")
 
 
+class TestInputFileDoesNotExist(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    @unittest.expectedFailure
+    def test_something(self):
+        main.main(arguments=["nonexistent_file"])
+
+    def tearDown(self):
+        pass
+
+
 class TestMainDebug(unittest.TestCase):
 
     def setUp(self):
@@ -336,7 +349,7 @@ class TestTaskMethods(unittest.TestCase):
         self.task.expand_variables()
         self.assertTrue(any([line for line in self.task.code if "test_var_value" in line]))
 
-    def outputs_do_not_exist(self):
+    def test_outputs_do_not_exist(self):
         task = Task(["file[0-3]", "file_*"],
                     ["file99", "file234"],
                     ["touch file4\n", "touch file5\n", "touch file6\n"],
@@ -344,6 +357,22 @@ class TestTaskMethods(unittest.TestCase):
                     {"test_var": "test_var_value"})
         with self.assertRaises(TaskFailedException):
             task()
+
+    def test_use_the_force(self):
+        f = open("file33", "w")
+        time.sleep(0.1)
+        f = open("file22", "w")
+        f.close()
+        self.assertTrue(os.path.getmtime("file33") < os.path.getmtime("file22"))
+        task = Task(["file22"],
+                    ["file33"],
+                    ["touch file33\n"],
+                    ["force"],
+                    {"test_var": "test_var_value"})
+        self.assertTrue(task.force)
+        task()
+        os.unlink("file22")
+        os.unlink("file33")
 
     def test_task(self):
         self.task()

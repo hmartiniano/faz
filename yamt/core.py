@@ -78,12 +78,12 @@ class Task(object):
                 print("Dependencies are newer than outputs.")
                 print("Running task.")
             else:
-                if "force" in self.options:
-                    print("Ouput file(s) exist and are newer than inputs, but 'force' option present.")
+                if self.force:
+                    print("Ouput file(s) are older than inputs, but 'force' option present.")
                     print("Running task.")
                     result = True
                 else:
-                    print("Ouput file(s) exist and are newer than inputs.")
+                    print("Ouput file(s) are older than inputs.")
         else:
             print("No ouput file(s).")
             print("Running task.")

@@ -10,6 +10,7 @@ TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inpu
 
 
 def split_task_parameters(line):
+    """ Split a string of comma separated words."""
     if line is None:
         result = []
     else:
@@ -18,6 +19,9 @@ def split_task_parameters(line):
 
 
 def find_tasks(lines):
+    """
+    Find task lines and corresponding line numbers in a list of lines.
+    """
     tasks = []
     linenumbers = []
     pattern = re.compile(TASK_PATTERN)
@@ -37,6 +41,10 @@ def find_tasks(lines):
 
 
 def create_environment(preamble):
+    """
+    Create a dictionary of variables obtained from the preamble of
+    the task file.
+    """
     environment = {}
     for line in preamble:
         logging.debug(line)

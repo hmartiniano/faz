@@ -406,7 +406,7 @@ class TestTaskMethods(unittest.TestCase):
             self.assertEqual(result, filename)
 
     def test_filename_variable_expansion(self):
-        results = self.task.check_filenames(["$test_var"])
+        results = self.task.expand_filenames(["$test_var"])
         self.assertEqual(results[0], "test_var_value")
 
     def test_nonexistant_file(self):

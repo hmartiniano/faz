@@ -21,6 +21,7 @@ class TempDirIsFileException(Exception):
 class Task(object):
 
     __dirname = ".yamt"
+    __variable_pattern = re.compile(r"\$\[([a-zA-Z0-9_]+)\]")
 
     def __init__(self, inputs, outputs, code, options, environment):
         self.inputs = inputs
@@ -47,21 +48,9 @@ class Task(object):
                 self.force = True
         self.interpreter = interpreter
 
-    def check_filenames(self, filenames):
-        result = []
-        for filename in filenames:
-            if "$" in filename:
-                template = Template(filename)
-                result.append(template.substitute(**self.environment))
-                logging.debug(
-                    "Expanding {} to {}.".format(filename, result[-1]))
-            else:
-                result.append(filename)
-        return result
-
     def check_inputs(self):
         """ Check for the existence of input files """
-        self.inputs = self.expand_filenames(self.check_filenames(self.inputs))
+        self.inputs = self.expand_filenames(self.inputs)
         result = False
         if len(self.inputs) == 0 or self.files_exist(self.inputs):
             result = True
@@ -71,7 +60,7 @@ class Task(object):
 
     def check_outputs(self):
         """ Check for the existence of output files """
-        self.outputs = self.expand_filenames(self.check_filenames(self.outputs))
+        self.outputs = self.expand_filenames(self.outputs)
         result = False
         if self.files_exist(self.outputs):
             if self.dependencies_are_newer(self.outputs, self.inputs):
@@ -97,9 +86,8 @@ class Task(object):
         Variables using the $<variable name> and ${<variable name>} formats
         are expanded by the shell (in the cases where bash is the interpreter.
         """
-        pattern = re.compile(r"\$\[([a-zA-Z0-9_]+)\]")
         for n, line in enumerate(self.code):
-            match = pattern.findall(line)
+            match = self.__variable_pattern.findall(line)
             if len(match) > 0:
                 for item in match:
                     value = self.environment.get(item)
@@ -108,10 +96,20 @@ class Task(object):
 
     def expand_filenames(self, filenames):
         """
-        Expand a list of filenames using shell expansion.
+        Expand a list of filenames using variables from the environment, 
+        foollowed by shell expansion.
         """
-        results = []
+        result = []
         for filename in filenames:
+            if "$" in filename:
+                template = Template(filename)
+                result.append(template.substitute(**self.environment))
+                logging.debug(
+                    "Expanding {} to {}.".format(filename, result[-1]))
+            else:
+                result.append(filename)
+        results = []
+        for filename in result:
             if any([pattern in filename for pattern in "*[]?"]):
                 expanded = glob.glob(filename)
                 if len(expanded) > 0:
@@ -167,7 +165,7 @@ class Task(object):
             print("***** Output:\n{}".format(out))
             os.close(self.fdesc)
             os.unlink(self.fname)
-            self.outputs = self.expand_filenames(self.check_filenames(self.original_outputs))
+            self.outputs = self.expand_filenames(self.original_outputs)
             if not(self.files_exist(self.outputs)):
                 print("Output files:")
                 for filename in self.outputs:

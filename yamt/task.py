@@ -148,17 +148,17 @@ class Task(object):
             self.mktemp_file()
             os.write(self.fdesc, "\n".join(self.code) + "\n")
             logging.debug("Environment before task:\n{}".format(self.environment))
-            print("Task inputs: {}\n".format(self.inputs))
-            print("Task outputs: {}\n".format(self.outputs))
+            print("Task inputs: {}".format(self.inputs))
+            print("Task outputs: {}".format(self.outputs))
             start = dt.now()
             try:
                 out = subprocess.check_output([self.interpreter, self.fname],
                                               env=self.environment)
             except subprocess.CalledProcessError as e:
-                print("Task {} failed with return code {}\n".format(self, e.returncode))
-                print("Output from task:\n")
+                print("Task {} failed with return code {}".format(self, e.returncode))
+                print("Output from task:")
                 print(e.output)
-                raise TaskFailedException("Task {} failed.\n".format(self))
+                raise TaskFailedException("Task {} failed.".format(self))
             end = dt.now()
             logging.debug("Environment after task:\n{}".format(self.environment))
             print("***** execution time {}".format(str(end - start)))

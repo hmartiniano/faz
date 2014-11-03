@@ -13,24 +13,23 @@ class DependencyGraph(nx.MultiDiGraph):
         """ Produce a dependency graph based on a list
             of tasks produced by the parser.
         """
-        for i in range(len(self.tasks)):
-            self.add_node(i)
+        self.add_nodes_from(self.tasks)
         for node1 in self.nodes():
             for node2 in self.nodes():
-                for input_file in self.tasks[node1].inputs:
-                    for output_file in self.tasks[node2].outputs:
+                for input_file in node1.inputs:
+                    for output_file in node2.outputs:
                         if output_file == input_file:
                             self.add_edge(node2, node1)
         tasks = []
-        for n, node in enumerate(nx.topological_sort(self)):
-            task = self.tasks[node]
-            task.predecessors = self.predecessors(node)
+        for n, task in enumerate(nx.topological_sort(self)):
+            #task = self.tasks[node]
+            task.predecessors = self.predecessors(task)
             task.order = n
             tasks.append(task)
         self.tasks = tasks
 
     def show_tasks(self):
-        for task in self.tasks:
+        for task in nx.topological_sort(self):
             print("Task {0}  ******************************".format(task.order))
             print("Predecessors: {0}".format(task.predecessors))
             print("options: {0}".format(task.options))

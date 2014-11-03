@@ -13,7 +13,8 @@ import time
 import unittest
 
 from yamt import main, parser
-from yamt.core import Task, TaskFailedException
+from yamt.task import Task, TaskFailedException
+from yamt.graph import DependencyGraph
 
 FILE1 = """
 # Using bash as the interpreter

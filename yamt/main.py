@@ -8,7 +8,7 @@ from time import strftime
 
 
 from yamt.parser import parse_input_file
-from yamt.core import execute, dependency_graph, show_tasks
+from yamt.graph import DependencyGraph
 
 
 logger = logging.getLogger(__name__)
@@ -43,9 +43,10 @@ def yamt(input_file, variables=None):
     logging.debug("input file:\n {0}\n".format(input_file))
     tasks = parse_input_file(input_file, variables=variables)
     print("Found {0} tasks.".format(len(tasks)))
-    graph = dependency_graph(tasks)
-    show_tasks(graph, tasks)
-    execute(graph, tasks)
+    graph = DependencyGraph(tasks)
+    graph.show_tasks()
+    graph.execute()
+
 
 
 def _create_parser():

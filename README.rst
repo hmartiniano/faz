@@ -69,7 +69,7 @@ to get a list of command line arguments type
 Task file basics
 ----------------
 
-The task file is a plain text file, with a syntax similar to the Drake input files.
+The task file is a plain text file, with a syntax similar to Drake input files.
 The following is an example with two tasks
 
 .. code-block:: python
@@ -91,7 +91,7 @@ by which the tasks have to be run, and if they need to be run. In the example ab
 called "file1" was already present in the directory the program was run, the first task would not be executed.
 
 The code sections, are all the lines in betweeen the two task lines. 
-In these two tasks, they are just are just plain bash commands, but could be, for example, python code
+In these two tasks, they are just are just plain bash commands but could be, for example, python code
 
 .. code-block:: python
 

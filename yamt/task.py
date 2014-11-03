@@ -7,7 +7,6 @@ import subprocess
 import tempfile
 from datetime import datetime as dt
 from string import Template
-import networkx as nx
 
 
 class TaskFailedException(Exception):
@@ -96,28 +95,27 @@ class Task(object):
 
     def expand_filenames(self, filenames):
         """
-        Expand a list of filenames using variables from the environment, 
-        foollowed by shell expansion.
+        Expand a list of filenames using variables from the environment,
+        followed by expansion of shell-style wildcards.
         """
-        result = []
+        results = []
         for filename in filenames:
+            result = filename
             if "$" in filename:
                 template = Template(filename)
-                result.append(template.substitute(**self.environment))
+                result = template.substitute(**self.environment)
                 logging.debug(
-                    "Expanding {} to {}.".format(filename, result[-1]))
-            else:
-                result.append(filename)
-        results = []
-        for filename in result:
-            if any([pattern in filename for pattern in "*[]?"]):
-                expanded = glob.glob(filename)
+                    "Expanding {} to {}.".format(filename, result))
+            if any([pattern in result for pattern in "*[]?"]):
+                expanded = glob.glob(result)
                 if len(expanded) > 0:
-                    results.extend(expanded)
+                    result = expanded
                 else:
-                    results.append("NONEXISTENT")
+                    result = "NONEXISTENT"
+            if isinstance(result, list):
+                results.extend(result)
             else:
-                results.append(filename)
+                results.append(result)
         return sorted(list(set(results)))
 
     def files_exist(self, filenames):
@@ -190,50 +188,3 @@ class Task(object):
             ", ".join(self.outputs),
             ", ".join(self.inputs),
             ", ".join(self.options))
-
-
-def execute(graph, tasks):
-    """
-    Given a dependency graph check inputs
-    and outputs and execute tasks if needed.
-    """
-    for node in nx.topological_sort(graph):
-        task = tasks[node]
-        task.order = node
-        print(80 * "*")
-        task()
-        print(80 * "*")
-
-
-def dependency_graph(tasks):
-    """ Produce a dependency graph based on a list
-        of tasks produced by the parser.
-    """
-    graph = nx.MultiDiGraph()
-    for i in range(len(tasks)):
-        graph.add_node(i)
-    for node1 in graph.nodes():
-        for node2 in graph.nodes():
-            for input_file in tasks[node1].inputs:
-                for output_file in tasks[node2].outputs:
-                    if output_file == input_file:
-                        graph.add_edge(node2, node1)
-    return graph
-
-
-def show_tasks(graph, tasks):
-    for n, node in enumerate(nx.topological_sort(graph)):
-        task = tasks[node]
-        task.predecessors = graph.predecessors(node)
-        task.order = n
-        print("Task {0}  ******************************".format(n))
-        print("Predecessors: {0}".format(task.predecessors))
-        print("options: {0}".format(task.options))
-        print("Interpreter: {0}".format(task.interpreter))
-        print("Environment: {0}".format(task.interpreter))
-        print("Inputs: {0}".format(task.inputs))
-        print("Outputs: {0}".format(task.outputs))
-        print("Code:")
-        for line in task.code:
-            print("{0}".format(line))
-    print("**************************************")

@@ -14,7 +14,7 @@ import unittest
 
 from yamt import main, parser
 from yamt.task import Task, TaskFailedException
-from yamt.graph import DependencyGraph
+from yamt.graph import DependencyGraph, CircularDependencyException
 
 FILE1 = """
 # Using bash as the interpreter
@@ -117,11 +117,21 @@ b = 3
 FILE8 = """
 file=asdf
 # Using bash as the interpreter
-# file21, file22 <-
+# file21, file22, $file <-
 touch file21 file22
 touch $file
 
 # file3, file4 <- file2*, $file
+touch file3 file4
+"""
+
+
+FILE9 = """
+# Using bash as the interpreter
+# file21, file22 <- file3
+touch file21 file22
+
+# file3, file4 <- file22, file21
 touch file3 file4
 """
 
@@ -311,6 +321,19 @@ class TestVariableExpansion(unittest.TestCase):
 
     def test_something(self):
         main.yamt(FILE8)
+
+    def tearDown(self):
+        pass
+
+
+class TestCircularDependencyException(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_something(self):
+        with self.assertRaises(CircularDependencyException):
+            main.yamt(FILE9)
 
     def tearDown(self):
         pass

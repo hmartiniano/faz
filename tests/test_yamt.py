@@ -14,7 +14,7 @@ import unittest
 
 from yamt import main, parser
 from yamt.task import Task, TaskFailedException
-from yamt.graph import DependencyGraph, CircularDependencyException
+from yamt.graph import CircularDependencyException
 
 FILE1 = """
 # Using bash as the interpreter

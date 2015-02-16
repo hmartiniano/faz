@@ -51,7 +51,6 @@ def yamt(input_file, variables=None):
     graph.execute()
 
 
-
 def _create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file',

@@ -8,7 +8,7 @@ import logging
 from yamt.task import Task
 
 
-TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, \$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, \$_\-\[\]\*]+)*"
+TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*"
 
 
 def split_task_parameters(line):

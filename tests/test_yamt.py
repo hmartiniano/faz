@@ -337,7 +337,9 @@ class TestVariableExpansion(unittest.TestCase):
         main.yamt(FILE8)
 
     def tearDown(self):
-        pass
+        for fname in glob.glob("file*"):
+            os.unlink(fname)
+        os.unlink('asdf')
 
 
 class TestCircularDependencyException(unittest.TestCase):

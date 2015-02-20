@@ -16,6 +16,20 @@ from yamt import main, parser
 from yamt.task import Task, TaskFailedException
 from yamt.graph import CircularDependencyException
 
+
+FILE = """file=file999
+# Using bash as the interpreter
+# file21, file22, $file <-
+touch file21 file22
+echo "Output from the first task"
+echo $file
+touch $file
+
+# file3, file4 <- file2*, $file :force
+touch file3 file4
+echo "Output from the last task"
+"""
+
 FILE1 = """
 # Using bash as the interpreter
 # file1, file2 <-

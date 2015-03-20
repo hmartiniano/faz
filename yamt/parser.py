@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import os
 import re
+import copy
 import logging
 
 
@@ -46,9 +47,9 @@ def find_tasks(lines):
 def create_environment(preamble):
     """
     Create a dictionary of variables obtained from the preamble of
-    the task file.
+    the task file and the environment the program is running on.
     """
-    environment = os.environ
+    environment = copy.deepcopy(os.environ)
     for line in preamble:
         logging.debug(line)
         if "=" in line and not line.startswith("#"):

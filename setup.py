@@ -24,7 +24,7 @@ test_requirements = [
 
 setup(
     name='yamt',
-    version='0.1.0',
+    version='0.1.1',
     description='"A Make-like tool with a syntax similar to Drake."',
     long_description=readme + '\n\n' + history,
     author='Hugo Martiniano',

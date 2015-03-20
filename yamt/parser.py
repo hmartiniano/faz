@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import os
 import re
 import logging
 
@@ -47,7 +48,7 @@ def create_environment(preamble):
     Create a dictionary of variables obtained from the preamble of
     the task file.
     """
-    environment = {}
+    environment = os.environ
     for line in preamble:
         logging.debug(line)
         if "=" in line and not line.startswith("#"):

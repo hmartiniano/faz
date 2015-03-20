@@ -46,7 +46,7 @@ class DependencyGraph(object):
             print("Predecessors: {0}".format(task.predecessors))
             print("options: {0}".format(task.options))
             print("Interpreter: {0}".format(task.interpreter))
-            print("Environment: {0}".format(task.interpreter))
+            print("Environment: {0}".format(task.environment))
             print("Inputs: {0}".format(task.inputs))
             print("Outputs: {0}".format(task.outputs))
             print("Code:")

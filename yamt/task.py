@@ -97,7 +97,7 @@ class Task(object):
 
     def expand_filenames(self, filenames):
         """
-        Expand a list of filenames using variables from the environment,
+        Expand a list of filenames using environment variables,
         followed by expansion of shell-style wildcards.
         """
         results = []

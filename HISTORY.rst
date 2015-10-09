@@ -6,4 +6,9 @@ History
 0.1.0 (2014-01-11)
 ---------------------
 
-* First release on PyPI.
+* First release.
+
+0.1.1 (2015-03-20)
+---------------------
+
+* Bug fixes.

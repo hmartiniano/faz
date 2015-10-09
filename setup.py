@@ -11,12 +11,7 @@ except ImportError:
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
-requirements = [
-    "networkx==1.9.1",
-    "argparse==1.2.1",
-    "decorator==3.4.0",
-    "wheel==0.23.0",
-]
+requirements = [line.strip() for line in open("requirements.txt").readlines()]
 
 test_requirements = [
     # TODO: put package test requirements here

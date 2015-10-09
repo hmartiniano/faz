@@ -43,8 +43,10 @@ test-all:
 coverage:
 	coverage run --source yamt setup.py test
 	coverage report -m
-	coverage html
-	open htmlcov/index.html
+	# Uncomment the following lines in the Makefile 
+	# to generate an html report and open it in the browser
+	# coverage html
+	# xdg-open htmlcov/index.html
 
 docs:
 	rm -f docs/yamt.rst

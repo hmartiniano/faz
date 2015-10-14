@@ -91,7 +91,7 @@ def main(arguments=sys.argv[1:]):
             level=logging.INFO
         )
     logging.debug("Options:")
-    for key, value in (vars(args)).iteritems():
+    for key, value in (vars(args)).items():
         logging.debug("{0}: {1}".format(key, value))
     with open(args.input_file) as f:
         input_file = f.read()

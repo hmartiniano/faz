@@ -33,9 +33,8 @@ class Task(object):
         self.environment = environment
         self.order = 0
         self.force = False
-        self.fdesc = None
-        self.fname = None
         self.interpreter = None
+        self.f = None
         self.check_options()
 
     def check_options(self):
@@ -146,13 +145,16 @@ class Task(object):
         if self.check_inputs() and self.check_outputs():
             self.expand_variables()
             self.mktemp_file()
-            os.write(self.fdesc, "\n".join(self.code) + "\n")
+            #os.write(self.f, "\n".join(self.code) + "\n")
+            self.f.write("\n".join(self.code) + "\n")
+            self.f.close()
             logging.debug("Environment before task:\n{}".format(self.environment))
             print("Task inputs: {}".format(self.inputs))
             print("Task outputs: {}".format(self.outputs))
             start = dt.now()
             try:
-                out = subprocess.check_output([self.interpreter, self.fname],
+                out = subprocess.check_output([self.interpreter, self.f.name],
+                                              stderr=subprocess.STDOUT,
                                               env=self.environment)
             except subprocess.CalledProcessError as e:
                 print("Task {} failed with return code {}".format(self, e.returncode))
@@ -163,8 +165,7 @@ class Task(object):
             logging.debug("Environment after task:\n{}".format(self.environment))
             print("***** execution time {}".format(str(end - start)))
             print("***** Output:\n{}".format(out))
-            os.close(self.fdesc)
-            os.unlink(self.fname)
+            #os.unlink(self.f.name)
             self.outputs = self.expand_filenames(self.original_outputs)
             if not(self.files_exist(self.outputs)):
                 print("Output files:")
@@ -182,8 +183,9 @@ class Task(object):
             raise TempDirIsFileException(
                 "There is a file called %s in this directory!!!" %
                 self.__dirname)
-        self.fdesc, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
-        logging.debug("Creating file {}".format(self.fname))
+        #self.fdesc, self.fname = tempfile.mkstemp(dir=self.__dirname, text=True)
+        self.f = tempfile.NamedTemporaryFile(dir=self.__dirname, delete=False, mode="wt")
+        logging.debug("Creating file {}".format(self.f.name))
 
     def __repr__(self):
         return "%s <- %s :%s" % (

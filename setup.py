@@ -1,35 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Always prefer setuptools over distutils
+from setuptools import setup, find_packages
+# To use a consistent encoding
+from codecs import open
+from os import path
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import yamt
 
 
-readme = open('README.rst').read()
-history = open('HISTORY.rst').read().replace('.. :changelog:', '')
+here = path.abspath(path.dirname(__file__))
+
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+    readme = f.read()
+
+with open(path.join(here, 'HISTORY.rst'), encoding='utf8') as f:
+    history = f.read().replace('.. :changelog:', '')
 
 requirements = [line.strip() for line in open("requirements.txt").readlines()]
 
 test_requirements = [
-    # TODO: put package test requirements here
+    'coverage',
 ]
 
 setup(
     name='yamt',
-    version='0.1.1',
+    version=yamt.__version__,
     description='"A Make-like tool with a syntax similar to Drake."',
     long_description=readme + '\n\n' + history,
-    author='Hugo Martiniano',
-    author_email='hugomartiniano@gmail.com',
-    url='https://github.com/hmartiniano/yamt',
-    packages=[
-        'yamt',
-    ],
-    package_dir={'yamt':
-                 'yamt'},
+    author=yamt.__author__,
+    author_email=yamt.__email__,
+    url=yamt.__url__,
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     entry_points={
         'console_scripts': [
             'yamt = yamt.main:main',
@@ -42,15 +45,19 @@ setup(
     keywords='yamt',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
+        'Environment :: Console',
         'Intended Audience :: Developers',
+        'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
+        # 'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
+        # 'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
     ],
     test_suite='tests',
     tests_require=test_requirements

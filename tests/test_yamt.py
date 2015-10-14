@@ -378,7 +378,8 @@ class TestTaskMethods(unittest.TestCase):
             if os.path.exists(filename) and os.path.isfile(filename):
                 os.unlink(filename)
         for filename in self.filenames:
-            open(filename, "w")
+            with open(filename, "w") as f:
+                f.close()
         self.task = Task(["file[0-3]", "file_*"],
                          ["file[4-6]"],
                          ["touch file4\n", "touch file5\n", "touch file6\n", "echo $[test_var]\n", "echo $test_var\n"],
@@ -405,9 +406,9 @@ class TestTaskMethods(unittest.TestCase):
         task = Task(["file[0-3]", "file_*"],
                     ["file99", "file234"],
                     ["touch file4\n",
-                    "touch file5\n",
-                    "touch file6\n",
-                    "ls non_existant_dir\n"],
+                     "touch file5\n",
+                     "touch file6\n",
+                     "ls non_existant_dir\n"],
                     ["force"],
                     {"test_var": "test_var_value"})
         with self.assertRaises(TaskFailedException):
@@ -454,9 +455,13 @@ class TestTaskMethods(unittest.TestCase):
         self.assertEqual(results[0], "NONEXISTENT")
 
     def test_dependencies_are_newer(self):
-        [open(filename, "w") for filename in ["old_file1", "old_file2"]]
+        for filename in ["old_file1", "old_file2"]:
+            with open(filename, "w") as f:
+                f.close()
         time.sleep(0.1)
-        [open(filename, "w") for filename in ["new_file1", "new_file2"]]
+        for filename in ["new_file1", "new_file2"]:
+            with open(filename, "w") as f:
+                f.close()
         result = self.task.dependencies_are_newer(["old_file1", "old_file2"],
                                                   ["new_file1", "new_file2"])
         self.assertTrue(result)
@@ -464,9 +469,13 @@ class TestTaskMethods(unittest.TestCase):
         [os.unlink(filename) for filename in ["new_file1", "new_file2"]]
 
     def test_dependencies_are_older(self):
-        [open(filename, "w") for filename in ["new_file1", "new_file2"]]
+        for filename in ["new_file1", "new_file2"]:
+            with open(filename, "w") as f:
+                f.close()
         time.sleep(0.1)
-        [open(filename, "w") for filename in ["old_file1", "old_file2"]]
+        for filename in ["old_file1", "old_file2"]:
+            with open(filename, "w") as f:
+                f.close()
         result = self.task.dependencies_are_newer(["old_file1", "old_file2"],
                                                   ["new_file1", "new_file2"])
         self.assertFalse(result)

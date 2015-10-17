@@ -1,7 +1,7 @@
-yamt
+faz
 ====
 
 .. toctree::
    :maxdepth: 4
 
-   yamt
+   faz

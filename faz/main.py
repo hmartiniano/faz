@@ -10,36 +10,28 @@ import sys
 from time import strftime
 
 
-from yamt.parser import parse_input_file
-from yamt.graph import DependencyGraph
+from faz.parser import parse_input_file
+from faz.graph import DependencyGraph
 
 
 logger = logging.getLogger(__name__)
 
 
 BANNER = """
- .----------------.  .----------------.  .----------------.  .----------------.
-| .--------------. || .--------------. || .--------------. || .--------------. |
-| |  ____  ____  | || |      __      | || | ____    ____ | || |  _________   | |
-| | |_  _||_  _| | || |     /  \     | || ||_   \  /   _|| || | |  _   _  |  | |
-| |   \ \  / /   | || |    / /\ \    | || |  |   \/   |  | || | |_/ | | \_|  | |
-| |    \ \/ /    | || |   / ____ \   | || |  | |\  /| |  | || |     | |      | |
-| |    _|  |_    | || | _/ /    \ \_ | || | _| |_\/_| |_ | || |    _| |_     | |
-| |   |______|   | || ||____|  |____|| || ||_____||_____|| || |   |_____|    | |
-| |              | || |              | || |              | || |              | |
-| '--------------' || '--------------' || '--------------' || '--------------' |
- '----------------'  '----------------'  '----------------'  '----------------'
-
-"Yet Another Make Tool"
+    __
+   / _|
+   | |_ __ _ ____
+   |  _/ _` |_  /
+   | || (_| |/ /
+   |_| \__,_/___|
 
 Developed by:
     Hugo Martiniano
 
-
 """
 
 
-def yamt(input_file, variables=None):
+def faz(input_file, variables=None):
     """
     YAMT program entry point.
     """
@@ -56,7 +48,7 @@ def _create_parser():
     parser.add_argument('input_file',
                         type=str,
                         nargs="?",
-                        default="yamtfile")
+                        default="fazfile")
     parser.add_argument('-v',
                         '--variables',
                         type=str,
@@ -95,7 +87,7 @@ def main(arguments=sys.argv[1:]):
         logging.debug("{0}: {1}".format(key, value))
     with open(args.input_file) as f:
         input_file = f.read()
-    yamt(input_file, variables=args.variables)
+    faz(input_file, variables=args.variables)
     print("\n********************" +
           "  Program Ended at: " +
           strftime("%Y-%m-%d %H:%M:%S") +

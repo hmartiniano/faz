@@ -32,7 +32,7 @@ clean-test:
 	rm -fr htmlcov/
 
 lint:
-	flake8 yamt tests
+	flake8 faz tests
 
 test:
 	python setup.py test
@@ -41,7 +41,7 @@ test-all:
 	tox
 
 coverage:
-	coverage run --source yamt setup.py test
+	coverage run --source faz setup.py test
 	coverage report -m
 	# Uncomment the following lines in the Makefile 
 	# to generate an html report and open it in the browser
@@ -49,9 +49,9 @@ coverage:
 	# xdg-open htmlcov/index.html
 
 docs:
-	rm -f docs/yamt.rst
+	rm -f docs/faz.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ yamt
+	sphinx-apidoc -o docs/ faz
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	open docs/_build/html/index.html

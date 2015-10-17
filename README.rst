@@ -1,20 +1,22 @@
 ===============================
-yamt
+faz
 ===============================
 
-.. image:: https://badge.fury.io/py/yamt.png
-    :target: http://badge.fury.io/py/yamt
+.. image:: https://badge.fury.io/py/faz.png
+    :target: http://badge.fury.io/py/faz
 
-.. image:: https://travis-ci.org/hmartiniano/yamt.png?branch=master
-        :target: https://travis-ci.org/hmartiniano/yamt
+.. image:: https://travis-ci.org/hmartiniano/faz.png?branch=master
+        :target: https://travis-ci.org/hmartiniano/faz
 
-.. image:: https://pypip.in/d/yamt/badge.png
-        :target: https://pypi.python.org/pypi/yamt
+.. image:: https://pypip.in/d/faz/badge.png
+        :target: https://pypi.python.org/pypi/faz
 
 
-A data workflow tool heavily inspired in .. _Drake: https://github.com/Factual/drake
+Faz is a data workflow tool heavily inspired in .. _Drake: https://github.com/Factual/drake
 
 The intended use is combining data treatment scripts in bash, python, ruby (or anything else, with a little coding) into a single text file.
+
+The name "faz" is portuguese for "do" or "make".
 
 The various steps can be separated into tasks, with defined inputs and outputs. Dependencies between the tasks are determined from inputs and outputs of every task. The program executes all tasks in the appropriate order, checking for the existence of output and input files.
 
@@ -22,7 +24,7 @@ The various steps can be separated into tasks, with defined inputs and outputs. 
 Why?
 ----
 
-* Because I like Drake but can't stand the startup time of java and can't be bothered to install drip.
+* Because I like Drake but can't stand the startup time of java.
 * Because I can (actually to see if I can, but it turns out I can).
 
 Features
@@ -31,8 +33,7 @@ Features
 * simple but robust functionality
 * easy to use and extend (the code, minus the tests, is around 300 lines of python)
 * fast startup time (compared to Drake)
-* Free software: GPLv3 license
-* Documentation: https://yamt.readthedocs.org.
+* Documentation: https://faz.readthedocs.org.
 
 Installation
 ------------
@@ -41,7 +42,7 @@ Using pypi
 
 .. code-block:: bash
 
-  pip install yamt
+  pip install faz
 
 
 Usage
@@ -51,20 +52,20 @@ From the command line, just type
 
 .. code-block:: bash
 
-  yamt
+  faz
 
-without arguments, the program will read the tasks from a file called "yamtfile".
+without arguments, the program will read the tasks from a file called "fazfile".
 If you want to use another filename, just give that as an argumento to the program
 
 .. code-block:: bash
 
-  yamt <filename>
+  faz <filename>
 
 to get a list of command line arguments type
 
 .. code-block:: bash
 
-  yamt -h
+  faz -h
 
 Task file basics
 ----------------

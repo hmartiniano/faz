@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-import yamt
+import faz
 
 
 here = path.abspath(path.dirname(__file__))
@@ -25,24 +25,24 @@ test_requirements = [
 ]
 
 setup(
-    name='yamt',
-    version=yamt.__version__,
+    name='faz',
+    version=faz.__version__,
     description='"A Make-like tool with a syntax similar to Drake."',
     long_description=readme + '\n\n' + history,
-    author=yamt.__author__,
-    author_email=yamt.__email__,
-    url=yamt.__url__,
+    author=faz.__author__,
+    author_email=faz.__email__,
+    url=faz.__url__,
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     entry_points={
         'console_scripts': [
-            'yamt = yamt.main:main',
+            'faz = faz.main:main',
         ]
     },
     include_package_data=True,
     install_requires=requirements,
     license="BSD",
     zip_safe=False,
-    keywords='yamt',
+    keywords='faz',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',

@@ -2,6 +2,6 @@
 Usage
 ========
 
-To use yamt in a project::
+To use faz in a project::
 
-    import yamt
+    import faz

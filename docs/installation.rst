@@ -4,9 +4,9 @@ Installation
 
 At the command line::
 
-    $ easy_install yamt
+    $ easy_install faz
 
 Or, if you have virtualenvwrapper installed::
 
-    $ mkvirtualenv yamt
-    $ pip install yamt
+    $ mkvirtualenv faz
+    $ pip install faz

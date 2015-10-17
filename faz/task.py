@@ -21,7 +21,7 @@ class TempDirIsFileException(Exception):
 
 class Task(object):
 
-    __dirname = ".yamt"
+    __dirname = ".faz"
     __variable_pattern = re.compile(r"\$\[([a-zA-Z0-9_]+)\]")
 
     def __init__(self, inputs, outputs, code, options, environment):
@@ -174,7 +174,7 @@ class Task(object):
                 raise TaskFailedException("Output files not created for Task {}\n".format(self))
 
     def mktemp_file(self):
-        """ Create a temporary file in the '.yamt' directory for
+        """ Create a temporary file in the '.faz' directory for
             the code to feed to the interpreter. """
         if not(os.path.exists(self.__dirname)):
             logging.debug("Creating directory {}".format(self.__dirname))

@@ -2,5 +2,5 @@
 
 __author__ = 'Hugo Martiniano'
 __email__ = 'hugomartiniano@gmail.com'
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 __url__ = 'https://github.com/hmartiniano/faz'

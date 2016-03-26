@@ -18,7 +18,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 with open(path.join(here, 'HISTORY.rst'), encoding='utf8') as f:
     history = f.read().replace('.. :changelog:', '')
 
-requirements = [line.strip() for line in open("requirements.txt").readlines()]
+# requirements = [line.strip() for line in open("requirements.txt").readlines()]
 
 test_requirements = [
     'coverage',
@@ -39,7 +39,11 @@ setup(
         ]
     },
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+        'argparse==1.2.1',
+        'decorator==3.4.0',
+        'wheel==0.24.0'
+        ],
     license="BSD",
     zip_safe=False,
     keywords='faz',

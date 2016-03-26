@@ -21,7 +21,7 @@ History
 0.1.3 (2016-03-26)
 ---------------------
 
-* NextworkX dependency removed.
+* NetworkX dependency removed.
 
 
 

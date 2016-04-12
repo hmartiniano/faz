@@ -8,8 +8,8 @@ faz
 .. image:: https://travis-ci.org/hmartiniano/faz.png?branch=master
         :target: https://travis-ci.org/hmartiniano/faz
 
-.. image:: https://pypip.in/d/faz/badge.png
-        :target: https://pypi.python.org/pypi/faz
+.. image:: https://badge.fury.io/py/faz.svg
+        :target: https://badge.fury.io/py/faz
 
 
 Faz is a data workflow tool heavily inspired in .. _Drake: https://github.com/Factual/drake

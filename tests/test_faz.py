@@ -137,6 +137,10 @@ touch $file
 
 # file3, file4 <- file2*, $file
 touch file3 file4
+
+# file5, file6 <- file3, file4
+touch $[OUTPUT1]
+touch $[OUTPUT2]
 """
 
 

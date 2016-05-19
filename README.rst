@@ -12,7 +12,8 @@ faz
         :target: https://badge.fury.io/py/faz
 
 
-Faz is a data workflow tool heavily inspired in .. _Drake: https://github.com/Factual/drake
+Faz is a data workflow tool heavily inspired in 
+.. _Drake: https://github.com/Factual/drake
 
 The intended use is combining data treatment scripts in bash, python, ruby (or anything else, with a little coding) into a single text file.
 

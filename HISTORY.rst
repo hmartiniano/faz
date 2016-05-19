@@ -23,5 +23,10 @@ History
 
 * NetworkX dependency removed.
 
+0.1.4 (2016-05-19)
+---------------------
+
+* Input and output names added to task environment.
+
 
 

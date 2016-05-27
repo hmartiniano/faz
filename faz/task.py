@@ -96,7 +96,7 @@ class Task(object):
                 for item in match:
                     value = self.environment.get(item)
                     if value is not None:
-                        self.code[n] = line.replace("$[" + item + "]", value)
+                        self.code[n] = self.code[n].replace("$[" + item + "]", value)
 
     def expand_filenames(self, filenames):
         """

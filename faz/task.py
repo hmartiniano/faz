@@ -86,6 +86,8 @@ class Task(object):
         Variables using the $<variable name> and ${<variable name>} formats
         are expanded by the shell (in the cases where bash is the interpreter.
         """
+        self.environment["INPUTS"] = self.inputs
+        self.environment["OUTPUTS"] = self.outputs
         for n, input_file in enumerate(self.inputs):
             self.environment["INPUT{}".format(n +1)] = input_file
         for n, output_file in enumerate(self.outputs):

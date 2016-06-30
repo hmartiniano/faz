@@ -154,7 +154,7 @@ touch file3 file4
 """
 
 
-class TestYamt(unittest.TestCase):
+class TestFaz(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -238,7 +238,7 @@ class TestMissingInputs(unittest.TestCase):
             os.unlink(fname)
 
 
-class TestYAMTFileInDir(unittest.TestCase):
+class TestFazFileInDir(unittest.TestCase):
 
     def setUp(self):
         for fname in glob.glob(".faz/tmp*"):

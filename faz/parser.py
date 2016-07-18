@@ -12,6 +12,8 @@ from faz.task import Task
 
 TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*"
 
+INCLUDE_PATTERN = r"^#include: (?P<include>[a-zA-Z0-9\.\_\-]+)$"
+
 
 def split_task_parameters(line):
     """ Split a string of comma separated words."""
@@ -20,6 +22,14 @@ def split_task_parameters(line):
     else:
         result = [parameter.strip() for parameter in line.split(",")]
     return result
+
+
+def find_includes(text):
+    pattern = re.compile(INCLUDE_PATTERN, re.MULTILINE)
+    for match in pattern.finditer(text):
+        with open(match.groups()[0]) as f:
+            text = re.sub(match.group(), f.read(), text)
+    return text
 
 
 def find_tasks(lines):
@@ -65,6 +75,7 @@ def create_environment(preamble):
 
 def parse_input_file(text, variables=None):
     """ Parser for a file with syntax somewhat similar to Drake."""
+    text = find_includes(text)
     lines = text.splitlines()
     tasks, linenumbers = find_tasks(lines)
     preamble = [line for line in lines[:linenumbers[0]]]

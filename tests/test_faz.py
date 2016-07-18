@@ -154,6 +154,15 @@ touch file3 file4
 """
 
 
+FILE10 = """
+#include: file1.txt
+#include: file2.txt
+
+# file3, file4 <- file1, file2
+touch file3 file4
+"""
+
+
 class TestFaz(unittest.TestCase):
 
     def setUp(self):
@@ -369,15 +378,13 @@ class TestTaskMethods(unittest.TestCase):
                           "file_2",
                           "file_3",
                           "file__1",
-                          "file__2",
-                          ]
+                          "file__2"]
         self.should_not_be_present = ["file4",
                                       "file5",
                                       "file6",
                                       "file7",
                                       "file8",
-                                      "file9",
-                                      ]
+                                      "file9"]
         for filename in self.should_not_be_present:
             if os.path.exists(filename) and os.path.isfile(filename):
                 os.unlink(filename)
@@ -489,6 +496,28 @@ class TestTaskMethods(unittest.TestCase):
     def tearDown(self):
         for filename in self.filenames:
             os.unlink(filename)
+
+
+class TestIncludeMechanism(unittest.TestCase):
+
+    def setUp(self):
+        with open("file1.txt", "w") as f:
+            f.write("# file1 <- \ntouch file1\n")
+            f.close()
+        with open("file2.txt", "w") as f:
+            f.write("# file2 <- \ntouch file2\n")
+            f.close()
+
+    def test_includes(self):
+        main.faz(FILE10)
+        self.assertTrue(os.path.isfile("file3"))
+        self.assertTrue(os.path.isfile("file4"))
+        for fname in ["file1", "file2", "file3", "file4", "file1.txt", "file2.txt"]:
+            os.unlink(fname)
+
+    def tearDown(self):
+        pass
+
 
 
 if __name__ == '__main__':

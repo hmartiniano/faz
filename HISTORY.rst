@@ -33,5 +33,11 @@ History
 
 * Bug Fixes in variable expansion code.
 
+0.1.6 (2016-07-18)
+---------------------
+
+* Added a mechanism to include other task files.
+
+
 
 

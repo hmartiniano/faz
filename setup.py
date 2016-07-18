@@ -22,6 +22,7 @@ with open(path.join(here, 'HISTORY.rst'), encoding='utf8') as f:
 
 test_requirements = [
     'coverage',
+    'bumpversion',
 ]
 
 setup(

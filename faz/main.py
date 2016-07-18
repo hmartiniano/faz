@@ -33,7 +33,7 @@ Developed by:
 
 def faz(input_file, variables=None):
     """
-    YAMT program entry point.
+    FAZ entry point.
     """
     logging.debug("input file:\n {0}\n".format(input_file))
     tasks = parse_input_file(input_file, variables=variables)

@@ -127,7 +127,7 @@ class Task(object):
 
     def files_exist(self, filenames):
         """ Check if all files in a given list exist. """
-        return all([os.path.exists(filename) and os.path.isfile(filename)
+        return all([os.path.exists(os.path.abspath(filename)) and os.path.isfile(os.path.abspath(filename))
                     for filename in filenames])
 
     def dependencies_are_newer(self, files, dependencies):

@@ -38,6 +38,11 @@ History
 
 * Added a mechanism to include other task files.
 
+0.1.7 (2016-07-20)
+---------------------
+
+* dependencies and outputs can now be on different directories.
+
 
 
 

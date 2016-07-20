@@ -10,7 +10,7 @@ import logging
 from faz.task import Task
 
 
-TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9, \.\$_\-\[\]\*]+)*"
+TASK_PATTERN = r"^#[ ]*(?P<outputs>[a-zA-Z0-9,\// \.\$_\-\[\]\*]+)*[ ]*<-[ ]*(?P<inputs>[a-zA-Z0-9,\// \.\$_\-\[\]\*]+)*[ ]*[:]*[ ]*(?P<options>[a-zA-Z0-9,\/ \.\$_\-\[\]\*]+)*"
 
 INCLUDE_PATTERN = r"^#include: (?P<include>[a-zA-Z0-9\.\_\-]+)$"
 

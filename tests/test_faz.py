@@ -162,6 +162,15 @@ FILE10 = """
 touch file3 file4
 """
 
+FILE11 = """
+# Using bash as the interpreter
+# data/file1, data/file2 <-
+mkdir data
+touch data/file1 data/file2
+
+# file3, file4 <- data/file2, data/file1
+touch file3 file4
+"""
 
 class TestFaz(unittest.TestCase):
 
@@ -512,13 +521,28 @@ class TestIncludeMechanism(unittest.TestCase):
         main.faz(FILE10)
         self.assertTrue(os.path.isfile("file3"))
         self.assertTrue(os.path.isfile("file4"))
+
+    def tearDown(self):
         for fname in ["file1", "file2", "file3", "file4", "file1.txt", "file2.txt"]:
             os.unlink(fname)
 
-    def tearDown(self):
+
+
+class TestAbsPAth(unittest.TestCase):
+
+    def setUp(self):
         pass
 
+    def test_abspath(self):
+        main.faz(FILE11)
+        self.assertTrue(os.path.isdir(os.path.abspath("data")))
+        self.assertTrue(os.path.isfile("file3"))
+        self.assertTrue(os.path.isfile("file4"))
 
+    def tearDown(self):
+        for fname in ["data/file1", "data/file2", "file3", "file4"]:
+            os.unlink(os.path.abspath(fname))
+        os.rmdir('data')
 
 if __name__ == '__main__':
     unittest.main(verbosity=3)

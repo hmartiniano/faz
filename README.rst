@@ -56,7 +56,7 @@ From the command line, just type
   faz
 
 without arguments, the program will read the tasks from a file called "fazfile".
-If you want to use another filename, just give that as an argumento to the program
+If you want to use another filename, just give that as an argument to the program
 
 .. code-block:: bash
 
@@ -92,7 +92,7 @@ The outputs and inputs and inputs of each task are used by the program to estabi
 by which the tasks have to be run, and if they need to be run. In the example above, if a file
 called "file1" was already present in the directory the program was run, the first task would not be executed.
 
-The code sections, are all the lines in betweeen the two task lines. 
+The code sections are all the lines in betweeen the two task lines. 
 In these two tasks, they are just are just plain bash commands but could be, for example, python code
 
 .. code-block:: python
@@ -108,6 +108,6 @@ In these two tasks, they are just are just plain bash commands but could be, for
 
 note that, in the second task, there's an extra option ":python", wich indicates to the program that
 the code from this task is python code.
-Options are a list of (comma separated) keywords follwing the ":", and must be placed after the inputs.
+Options are a list of (comma separated) keywords following the ":", and must be placed after the inputs.
 
 

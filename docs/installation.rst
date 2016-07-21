@@ -2,9 +2,9 @@
 Installation
 ============
 
-At the command line::
+From pipy::
 
-    $ easy_install faz
+    $ pip install faz
 
 Or, if you have virtualenvwrapper installed::
 

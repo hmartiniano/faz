@@ -43,7 +43,7 @@ setup(
     install_requires=[
         'argparse==1.2.1',
         'decorator==3.4.0',
-        'wheel==0.38.1'
+        'wheel==0.46.2'
         ],
     license="BSD",
     zip_safe=False,
